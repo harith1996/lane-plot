@@ -1,3 +1,6 @@
+# Data and backend
+backend/raw_data
+
 # Logs
 logs
 *.log
