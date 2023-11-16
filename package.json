@@ -12,5 +12,11 @@
     "@sveltejs/vite-plugin-svelte": "^2.4.2",
     "svelte": "^4.0.5",
     "vite": "^4.4.5"
+  },
+  "dependencies": {
+    "@types/d3": "^7.4.3",
+    "d3": "^7.8.5",
+    "d3-array": "^3.2.4",
+    "simplex-noise": "^4.0.1"
   }
 }
