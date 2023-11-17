@@ -1,0 +1,5 @@
+pandas
+Flask
+matplotlib
+flask-cors
+virtualenv
