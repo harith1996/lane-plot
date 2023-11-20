@@ -1,5 +1,7 @@
 import React from 'react';
 import './App.css';
+import MultiSelect from './components/MultiSelect';
+import Scatterplot from './components/Scatterplot';
 
 function App() {
 
@@ -9,10 +11,10 @@ function App() {
         Filters
       </div>
       <div>
-        Add more plots
+        <MultiSelect></MultiSelect>
       </div>
       <div>
-        Scatterplots
+        <Scatterplot></Scatterplot>
       </div>
     </div>
   );
