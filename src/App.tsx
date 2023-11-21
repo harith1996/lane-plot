@@ -1,31 +1,46 @@
 import React, { useEffect } from "react";
 import "./App.css";
-import MultiSelect from "./components/MultiSelect";
-import Scatterplot from "./components/Scatterplot";
-import SingleSelect from "./components/SingleSelect";
+import Filters from "./components/Filters";
+import Plots from "./components/Plots";
+import { Plot } from "./types/PlotsTypes";
 
 function App() {
-  const [selected1, setSelected1] = React.useState<string>("");
-  let options1 = ["option1", "option2", "option3", "option4"];
-  let defaultValue1 = "option1";
-  let label1 = "label1";
-  const onChange1 = (value: string) => {
-    setSelected1(value)
-  };
-  return (
-    <div className="App">
-      <div>
-        Filters
-      <SingleSelect options={options1} onChange={onChange1} label={label1} selectedValue={selected1}></SingleSelect>
-      </div>
-      <div>
-        <MultiSelect></MultiSelect>
-      </div>
-      <div>
-        <Scatterplot></Scatterplot>
-      </div>
-    </div>
-  );
+	const [activePlots, setActivePlots] = React.useState<Plot[]>([]);
+	useEffect(() => {
+		//set dummy Plot
+		setActivePlots([
+			{
+				labels: {
+					xLabel: "x",
+					yLabel: "y",
+				},
+				options: {
+					xDomain: [0, 100],
+					yDomain: [0, 100],
+				},
+				data: [
+					{
+						x: 50,
+						y: 50,
+					},
+					{
+						x: 60,
+						y: 60,
+					},
+				],
+			},
+		]);
+	}, []);
+	return (
+		<div className="App">
+			<div>
+				<Filters></Filters>
+			</div>
+			<div>
+				<Plots plots={activePlots}></Plots>
+			</div>
+		</div>
+	);
 }
 
 export default App;
