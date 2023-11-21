@@ -5,6 +5,9 @@ import { PlotsProps } from "../types/PlotsTypes";
 export default function Plots(props: PlotsProps) {
 	const [selectedData, setSelectedData] = React.useState<any[]>([]);
 
+	const onSelectionChange = (data: any) => {
+		console.log(data);
+	};
 	return (
 		<div>
 			Plots
@@ -12,7 +15,7 @@ export default function Plots(props: PlotsProps) {
 				return (
 					<div>
 						{JSON.stringify(plot.labels)}
-						<Scatterplot {...plot}></Scatterplot>
+						<Scatterplot plot={plot} selectionCallback={onSelectionChange} ></Scatterplot>
 					</div>
 				);
 			})}

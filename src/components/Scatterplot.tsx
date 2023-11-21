@@ -2,8 +2,14 @@ import React from "react";
 import { useD3 } from "../hooks/useD3";
 import { Plot } from "../types/PlotsTypes";
 import * as d3 from "d3";
+type ScatterplotProps = {
+	plot: Plot;
+	selectionCallback: any;
+};
 
-export default function Scatterplot(plot: Plot) {
+export default function Scatterplot(props: ScatterplotProps) {
+	const plot = props.plot;
+	const selectionCallback = props.selectionCallback;
 	const data = plot.data;
 	const ref = useD3(
 		(svg) => {
@@ -61,16 +67,41 @@ export default function Scatterplot(plot: Plot) {
 			svg.select(".y-axis").call(yAxis);
 
 			// Append the dots.
-			const dot = svg
-				.select(".plot-area")
-				.attr("stroke", "steelblue")
-				.attr("stroke-width", 0)
+			const plotArea = svg.select(".plot-area");
+			const dot = plotArea
+					.attr("stroke", "steelblue")
+					.attr("stroke-width", 0)
 				.selectAll("circle")
 				.data(data)
 				.join("circle")
-				.attr("transform", (d) => `translate(${x(d.x)},${y(d.y)})`)
-				.attr("r", 7)
-				.attr("opacity", 0.3);
+					.attr("transform", (d) => `translate(${x(d.x)},${y(d.y)})`)
+					.attr("r", 7)
+					.attr("opacity", 0.3);
+			// svg.call(
+			// 	d3.brush().on("start brush end", ({ selection }) => {
+			// 		let value: any[] = [];
+			// 		if (selection) {
+			// 			const [[x0, y0], [x1, y1]] = selection;
+			// 			value = dot
+			// 				.style("stroke", "gray")
+			// 				.filter(
+			// 					(d) =>
+			// 						x0 <= x(d.x) &&
+			// 						x(d.x) < x1 &&
+			// 						y0 <= y(d.y) &&
+			// 						y(d.y) < y1
+			// 				)
+			// 				.style("stroke", "steelblue")
+			// 				.data();
+			// 		} else {
+			// 			dot.style("stroke", "steelblue");
+			// 		}
+
+			// 		// Inform downstream cells that the selection has changed.
+			// 		svg.property("value", value).dispatch("input");
+			// 		selectionCallback(value);
+			// 	}) as any
+			// );
 		},
 		[plot]
 	);
