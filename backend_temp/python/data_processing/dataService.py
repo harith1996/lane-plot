@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-from diffComputer import DiffComputer
+from data_processing.diffComputer import DiffComputer
 
 
 class DataService:
