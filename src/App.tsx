@@ -1,15 +1,12 @@
-import React from 'react';
-import './App.css';
-import MultiSelect from './components/MultiSelect';
-import Scatterplot from './components/Scatterplot';
+import React from "react";
+import "./App.css";
+import MultiSelect from "./components/MultiSelect";
+import Scatterplot from "./components/Scatterplot";
 
 function App() {
-
   return (
     <div className="App">
-      <div>
-        Filters
-      </div>
+      <div>Filters</div>
       <div>
         <MultiSelect></MultiSelect>
       </div>
