@@ -3,33 +3,31 @@ import "./App.css";
 import Filters from "./components/Filters";
 import Plots from "./components/Plots";
 import { Plot } from "./types/PlotsTypes";
+import DataService from "./services/dataService";
 
 function App() {
 	const [activePlots, setActivePlots] = React.useState<Plot[]>([]);
+	const ds = new DataService("http://localhost:5000");
 	useEffect(() => {
-		//set dummy Plot
-		setActivePlots([
-			{
-				labels: {
-					xLabel: "x",
-					yLabel: "y",
-				},
-				options: {
-					xDomain: [0, 100],
-					yDomain: [0, 100],
-				},
-				data: [
-					{
-						x: 50,
-						y: 50,
+		ds.fetchData().then((data) => {
+			console.log(data);
+			//preprocess data before sending to plots
+			const plotData = ds.plotsifyData(data, "diffNext_revision_text_bytes", "diffPrev_revision_text_bytes");
+
+			setActivePlots([
+				{
+					labels: {
+						xLabel: "diffNext_revision_bytes",
+						yLabel: "diffPrev_revision_bytes",
 					},
-					{
-						x: 60,
-						y: 60,
+					options: {
+						xDomain: undefined, //compute domain from min-max
+						yDomain: undefined,
 					},
-				],
-			},
-		]);
+					data: plotData
+				}
+			]);
+		});
 	}, []);
 	return (
 		<div className="App">
