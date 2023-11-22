@@ -5,10 +5,11 @@ from data_processing.diffComputer import DiffComputer
 
 
 class DataService:
-    def __init__(self, df: pd.DataFrame, fieldTypeMap: dict):
+    def __init__(self, df: pd.DataFrame, fieldTypeMap: dict, idFieldName: str = "unique_id"):
         self.df = df
         self.fieldTypeMap = fieldTypeMap
-        self.df["unique_id"] = list(range(df.shape[0]))
+        self.idFieldName = idFieldName
+        self.df[self.idFieldName] = list(range(df.shape[0]))
 
     def split_time(self, timeFieldName):
         df = self.df
@@ -20,35 +21,20 @@ class DataService:
         df["Hour"] = df["Time"].dt.hour
         df["Timestamp"] = (df["Time"] - pd.Timestamp("1970-01-01")) // pd.Timedelta('1s')
 
-    def get_filtered_data(
+    def get_eq_filtered_data(
         self,
         APP_ROOT,
-        x_axis,
-        y_axis,
-        nullColumnName,
-        run_pivot_column,
-        run_pivot_value,
+        columns,
+        filter_col,
+        filter_val,
     ):
         df = self.df
+        out_attributes =  columns + [self.idFieldName]
         df_filtered = None
-        df_filtered = df[df[run_pivot_column].astype(str) == str(run_pivot_value)]
-        df_filtered = df_filtered[[x_axis, y_axis, nullColumnName, "unique_id"]]
+        df_filtered = df[df[filter_col].astype(str) == str(filter_val)]
+        df_filtered = df_filtered[out_attributes]
         return df_filtered.to_json(orient="values")
-
-    def get_null_perc(self, targetAtts, runPivotAtt):
-        df = self.df
-        unique_pivot_values = df[runPivotAtt].unique()
-        unique_pivot_values = sorted(unique_pivot_values)
-        out = []
-        for t in targetAtts:
-            null_perc = {"targetAtt": str(t)}
-            for value in unique_pivot_values:
-                null_perc["runPivotValue"] = str(value)
-                df_filtered = df[df[runPivotAtt] == value]
-                null_perc["nullPerc"] = df_filtered[t].isnull().sum() / len(df_filtered)
-                out.append(null_perc.copy())
-        return list(out)
-
+    
     def get_sorted_df(self, sortBy: str):
         df = self.df
         sortedDf = df.sort_values(by=sortBy, kind="stable")
@@ -59,7 +45,7 @@ class DataService:
         # sort dataframe by df
         sortedDf = self.get_sorted_df(linearOrderBy)
         # get list of values for column fieldName
-        filteredDf = sortedDf[["unique_id", fieldName]]
+        filteredDf = sortedDf[[self.idFieldName, fieldName]]
         keyValuePairs = filteredDf.values.tolist()
         keyValuePairs = list(filter(lambda x: not np.isnan(x[1]), keyValuePairs))
         values = list(map(lambda x: x[1], keyValuePairs))
@@ -86,7 +72,7 @@ class DataService:
                 item["diffPrev"] = diffC.compute_diff(values[i - 1], values[i])
                 item["diffNext"] = diffC.compute_diff(values[i + 1], values[i])
 
-            item["unique_id"] = int(keyValuePairs[i][0])
+            item[self.idFieldName] = int(keyValuePairs[i][0])
             diffList.append(item)
         return list(diffList)
 
@@ -96,7 +82,7 @@ class DataService:
     def get_data_in_extent(
         self, xField, yField, x1, y1, x2, y2, queryFields
     ) -> pd.DataFrame:
-        filtered_df = self.df[queryFields + [xField, yField, "unique_id"]]
+        filtered_df = self.df[queryFields + [xField, yField, self.idFieldName]]
         filtered_df = filtered_df[
             (filtered_df[xField] >= float(x1))
             & (filtered_df[xField] <= float(x2))
@@ -112,5 +98,5 @@ class DataService:
     def add_values_by_id(self, fieldName, keyValuePairs):
         df = self.df
         for keyValuePair in keyValuePairs:
-            df.loc[df["unique_id"] == int(keyValuePair[0]), fieldName] = keyValuePair[1]
+            df.loc[df[self.idFieldName] == int(keyValuePair[0]), fieldName] = keyValuePair[1]
         return df
