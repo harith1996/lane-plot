@@ -40,7 +40,7 @@ reader = pd.read_csv(
 )
 df = reader.get_chunk(500)
 app = Flask(__name__)
-get_page_with_max_edits(df)
+print(get_page_with_max_edits(df))
 CORS(app)
 
 ds = DataService(df, {"event_timestamp": "dateTime"})
