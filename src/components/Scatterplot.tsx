@@ -3,6 +3,7 @@ import { useD3 } from "../hooks/useD3";
 import { Plot } from "../types/PlotsTypes";
 import * as d3 from "d3";
 import * as d3Hexbin from "d3-hexbin";
+import Legend from "../d3/Legend";
 type ScatterplotProps = {
 	plot: Plot;
 	selectionCallback: any;
@@ -16,7 +17,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 		(svg) => {
 			const height = 500;
 			const width = 500;
-			const margin = { top: 20, right: 30, bottom: 30, left: 60 };
+			const margin = { top: 20, right: 30, bottom: 80, left: 60 };
 
 			const xScale = d3
 				.scaleSymlog()
@@ -90,6 +91,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 			const colorScale = d3
 				.scaleSequentialSymlog(d3.interpolateBlues)
 				.domain([0, Math.max(...bins.map((b) => b.length))]);
+
 			const plotArea = svg.select(".plot-area");
 			plotArea
 				.attr("stroke", "#000")
@@ -100,6 +102,17 @@ export default function Scatterplot(props: ScatterplotProps) {
 				.attr("d", hexbin.hexagon())
 				.attr("transform", (d) => `translate(${d.x},${d.y})`)
 				.attr("fill", (d) => colorScale(d.length));
+
+			// append color legend
+			const legend = Legend(colorScale, {
+				title: "Number of points"
+			});
+			svg.select(".colorLegend")
+				.html(legend?.innerHTML as string)
+				.attr(
+					"transform",
+					`translate(${margin.left},${height - margin.bottom + 30})`
+				);
 			/*************** BINNED SCATTERPLOT */
 
 			/*************** SCATTERPLOT
@@ -156,6 +169,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 				<g className="plot-area" />
 				<g className="x-axis" />
 				<g className="y-axis" />
+				<g className="colorLegend" />
 			</svg>
 		</div>
 	);
