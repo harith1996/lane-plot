@@ -16,10 +16,10 @@ export default function Scatterplot(props: ScatterplotProps) {
 		(svg) => {
 			const height = 500;
 			const width = 500;
-			const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+			const margin = { top: 20, right: 30, bottom: 30, left: 60 };
 
 			const xScale = d3
-				.scaleLinear()
+				.scaleSymlog()
 				.domain(
 					plot.options.xDomain ||
 						(d3.extent(data, (d) => d.x) as [number, number])
@@ -28,7 +28,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 				.clamp(true);
 
 			const yScale = d3
-				.scaleLinear()
+				.scaleSymlog()
 				.domain(
 					plot.options.yDomain ||
 						(d3.extent(data, (d) => d.y) as [number, number])
