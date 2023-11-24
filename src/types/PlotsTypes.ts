@@ -4,8 +4,8 @@ export type PlotLabels = {
 };
 
 export type PlotOptions = {
-	xDomain: number[] | undefined;
-	yDomain: number[] | undefined;
+	xDomain: [number,number] | undefined;
+	yDomain: [number,number] | undefined;
 };
 
 export type PlotDataPoint = {
