@@ -19,21 +19,36 @@ export default function Scatterplot(props: ScatterplotProps) {
 			const width = 500;
 			const margin = { top: 20, right: 30, bottom: 80, left: 60 };
 
+			let xDomain =
+				plot.options.xDomain ||
+				(d3.extent(data, (d) => d.x) as [number, number]);
+			let yDomain =
+				plot.options.yDomain ||
+				(d3.extent(data, (d) => d.y) as [number, number]);
+
+			//Change domain to include 0
+			if (xDomain[0] > 0) {
+				xDomain[0] = 0;
+			}
+			if (yDomain[0] > 0) {
+				yDomain[0] = 0;
+			}
+			if (xDomain[1] < 0) {
+				xDomain[1] = 0;
+			}
+			if (yDomain[1] < 0) {
+				yDomain[1] = 0;
+			}
+
 			const xScale = d3
 				.scaleSymlog()
-				.domain(
-					plot.options.xDomain ||
-						(d3.extent(data, (d) => d.x) as [number, number])
-				)
+				.domain(xDomain)
 				.rangeRound([margin.left, width - margin.right])
 				.clamp(true);
 
 			const yScale = d3
 				.scaleSymlog()
-				.domain(
-					plot.options.yDomain ||
-						(d3.extent(data, (d) => d.y) as [number, number])
-				)
+				.domain(yDomain)
 				.rangeRound([height - margin.bottom, margin.top])
 				.clamp(true);
 
@@ -48,21 +63,19 @@ export default function Scatterplot(props: ScatterplotProps) {
 			];
 
 			const xAxis = (g: any) =>
-				g
-					.attr("transform", `translate(0,${height - margin.bottom})`)
-					.call(
-						d3
-							.axisBottom(xScale)
-							.tickValues(
-								d3
-									.ticks(...xTicks, width / 80)
-									.filter((v) => xScale(v) !== undefined)
-							)
-							.tickSizeOuter(0)
-					);
+				g.attr("transform", `translate(0,${yScale(0)})`).call(
+					d3
+						.axisBottom(xScale)
+						.tickValues(
+							d3
+								.ticks(...xTicks, width / 80)
+								.filter((v) => xScale(v) !== undefined)
+						)
+						.tickSizeOuter(0)
+				);
 
 			const yAxis = (g: any) =>
-				g.attr("transform", `translate(${margin.left},0)`).call(
+				g.attr("transform", `translate(${xScale(0)},0)`).call(
 					d3
 						.axisLeft(yScale)
 						.tickValues(
@@ -105,7 +118,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 
 			// append color legend
 			const legend = Legend(colorScale, {
-				title: "Number of points"
+				title: "Number of points",
 			});
 			svg.select(".colorLegend")
 				.html(legend?.innerHTML as string)
