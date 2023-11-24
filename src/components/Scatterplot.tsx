@@ -9,36 +9,54 @@ type ScatterplotProps = {
 	selectionCallback: any;
 };
 
+function getDomains(
+	data: any[],
+	xDomain: [number, number] | undefined,
+	yDomain: [number, number] | undefined
+) {
+	let xDomainNew =
+		xDomain || (d3.extent(data, (d) => d.x) as [number, number]);
+	let yDomainNew =
+		yDomain || (d3.extent(data, (d) => d.y) as [number, number]);
+	if (xDomainNew[0] > 0) {
+		xDomainNew[0] = 0;
+	}
+	if (yDomainNew[0] > 0) {
+		yDomainNew[0] = 0;
+	}
+	if (xDomainNew[1] < 0) {
+		xDomainNew[1] = 0;
+	}
+	if (yDomainNew[1] < 0) {
+		yDomainNew[1] = 0;
+	}
+
+	//add padding to domain
+	const xDomainPadding = (xDomainNew[1] - xDomainNew[0]) * 0.1;
+	const yDomainPadding = (yDomainNew[1] - yDomainNew[0]) * 0.1;
+	xDomainNew[0] -= xDomainPadding;
+	xDomainNew[1] += xDomainPadding;
+	yDomainNew[0] -= yDomainPadding;
+	yDomainNew[1] += yDomainPadding;
+
+	return [xDomainNew, yDomainNew];
+}
+
 export default function Scatterplot(props: ScatterplotProps) {
 	const plot = props.plot;
 	const selectionCallback = props.selectionCallback;
 	const data = plot.data;
 	const ref = useD3(
 		(svg) => {
-			const height = 500;
-			const width = 500;
+			const height = 700;
+			const width = 700;
 			const margin = { top: 20, right: 30, bottom: 80, left: 60 };
 
-			let xDomain =
-				plot.options.xDomain ||
-				(d3.extent(data, (d) => d.x) as [number, number]);
-			let yDomain =
-				plot.options.yDomain ||
-				(d3.extent(data, (d) => d.y) as [number, number]);
-
-			//Change domain to include 0
-			if (xDomain[0] > 0) {
-				xDomain[0] = 0;
-			}
-			if (yDomain[0] > 0) {
-				yDomain[0] = 0;
-			}
-			if (xDomain[1] < 0) {
-				xDomain[1] = 0;
-			}
-			if (yDomain[1] < 0) {
-				yDomain[1] = 0;
-			}
+			const [xDomain, yDomain] = getDomains(
+				data,
+				plot.options.xDomain,
+				plot.options.yDomain
+			);
 
 			const xScale = d3
 				.scaleSymlog()
@@ -173,7 +191,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 			<svg
 				ref={ref}
 				style={{
-					height: 500,
+					height: 1000,
 					width: "100%",
 					marginRight: "0px",
 					marginLeft: "0px",
