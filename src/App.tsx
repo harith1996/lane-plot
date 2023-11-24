@@ -5,6 +5,7 @@ import Plots from "./components/Plots";
 import { Plot } from "./types/PlotsTypes";
 import DataService from "./services/dataService";
 
+
 function App() {
 	const [activePlots, setActivePlots] = React.useState<Plot[]>([]);
 	const ds = new DataService("http://localhost:5000");
@@ -12,7 +13,11 @@ function App() {
 		ds.fetchData().then((data) => {
 			console.log(data);
 			//preprocess data before sending to plots
-			const plotData = ds.plotsifyData(data, "diffNext_revision_text_bytes", "diffPrev_revision_text_bytes");
+			const plotData = ds.plotsifyData(
+				data,
+				"diffNext_revision_text_bytes",
+				"diffPrev_revision_text_bytes"
+			);
 
 			setActivePlots([
 				{
@@ -24,20 +29,20 @@ function App() {
 						xDomain: undefined, //compute domain from min-max
 						yDomain: undefined,
 					},
-					data: plotData
-				}
+					data: plotData,
+				},
 			]);
 		});
 	}, []);
 	return (
-		<div className="App">
-			<div>
-				<Filters></Filters>
+			<div className="App">
+				<div>
+					<Filters></Filters>
+				</div>
+				<div>
+					<Plots plots={activePlots}></Plots>
+				</div>
 			</div>
-			<div>
-				<Plots plots={activePlots}></Plots>
-			</div>
-		</div>
 	);
 }
 
