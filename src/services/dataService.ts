@@ -1,11 +1,17 @@
 export default class DataService {
 	host: string;
 	attributes: string[];
+	initPromise: Promise<boolean>;
 	constructor(host: string) {
 		this.host = host;
 		this.attributes = [];
-		this.fetchAttributes().then((data: any) => {
-			this.attributes = data;
+		this.initPromise = this.initialize();
+	}
+
+	initialize() {
+		return this.fetchAttributes().then((attributes) => {
+			this.attributes = attributes;
+			return true;
 		});
 	}
 
@@ -15,8 +21,16 @@ export default class DataService {
 			.then((data) => data);
 	}
 
-	fetchData() {
-		return fetch(this.host + "/preview")
+	fetchData(
+		filterColumn: string = "page_id",
+		filterValue: string = "68401269",
+		attributes: string[] = ["page_title_historical"]
+	) {
+		const reqAttributes = attributes.join(",");
+		return fetch(
+			this.host +
+				`/get-data?filterColumn=${filterColumn}&filterValue=${filterValue}&attributes=${reqAttributes}`
+		)
 			.then((response) => response.json())
 			.then((data) => data);
 	}
