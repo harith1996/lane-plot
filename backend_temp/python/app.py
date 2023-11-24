@@ -1,28 +1,29 @@
-import pandas as pd
+import modin.pandas as pd
 import random
 from flask import Flask, redirect, url_for, request, jsonify
 from flask_cors import CORS
 from data_processing.dataService import DataService
-from data_processing.wiki_history_helper import get_page_with_max_edits
+from data_processing.wiki_history_helper import get_page_with_max_edits, get_user_with_max_edits
 
 filename = "./backend_temp/raw_data/diff_revision_text_bytes.csv"
 
 # check file extension
 sep = ","
+columns = None
 if filename.split(".")[-1] == "tsv":
     sep = "\t"
+    columns = open(
+    "backend_temp/raw_data/2023-10.enwiki.2023-10_columns.txt", "r"
+).readlines()
+    columns = list(line.split("\n")[0] for line in columns)
 
 p = 1  # fraction of the data/
 # if random from [0,1] interval is greater than p the row will be skipped
 random.seed(4)
 
-columns = open(
-    "backend_temp/raw_data/2023-10.enwiki.2023-10_columns.txt", "r"
-).readlines()
-columns = list(line.split("\n")[0] for line in columns)
-
 reader = pd.read_csv(
-    filename,iterator=True,
+    filename,
+    iterator=True,
     # header=0,
     skiprows=lambda i: i > 0 and random.random() > p,
     # skiprows = lambda i : i > 1000,
@@ -34,11 +35,11 @@ reader = pd.read_csv(
         "user_id": str,
         "revision_id": str,
         "revision_parent_id": str,
-        "revision_first_identity_reverting_revision_id": str
-    }
-    # names=columns,
+        "revision_first_identity_reverting_revision_id": str,
+    },
+    names=columns,
 )
-df = reader.get_chunk(500)
+df = reader.get_chunk(50000)
 app = Flask(__name__)
 print(get_page_with_max_edits(df))
 CORS(app)
@@ -70,7 +71,18 @@ def data_mins():
 
 @app.route(f"/preview")
 def data_preview():
-    return df.head(100).to_json(orient="values")
+    return df.to_json(orient="values")
+
+
+# set nullColumnName
+@app.route(f"/get-data")
+def get_data():
+    # extract arguments from request
+    filter_col = request.args.get("filterColumn")
+    filter_val = request.args.get("filterValue")
+    attributes = request.args.get("attributes").split(",")
+    return ds.get_eq_filtered_data(list(df.columns), filter_col, filter_val)
+
 
 @app.route(f"/get-diff-list")
 def get_diff_list():
@@ -92,8 +104,9 @@ def add_diff_list():
     ds.add_values_by_id(prevFieldName, prevValues)
     ds.add_values_by_id(nextFieldName, nextValues)
     print(ds.df)
-    ds.df.to_csv('diff_' + fieldName + ".csv", sep=',')
+    ds.df.to_csv("diff_" + fieldName + ".csv", sep=",")
     return jsonify(diffList)
+
 
 if __name__ == "__main__":
     app.run(debug=False)
