@@ -45,6 +45,7 @@ class DataService:
         sortedDf = df.sort_values(by=sortBy, kind="stable")
         return sortedDf
 
+    #TODO: add values directly to dataframe
     def get_diff_list(self, fieldName, linearOrderBy):
         # sort dataframe by df
         sortedDf = self.get_sorted_df(linearOrderBy)
@@ -97,6 +98,7 @@ class DataService:
 
         # return list of diffs
 
+    #TODO: improve performance
     def add_values_by_id(self, fieldName, keyValuePairs):
         df = self.df
         for keyValuePair in keyValuePairs:
