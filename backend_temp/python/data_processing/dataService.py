@@ -1,11 +1,14 @@
-import pandas as pd
+import modin.pandas as pd
 import numpy as np
+from tqdm import tqdm
 
 from data_processing.diffComputer import DiffComputer
 
 
 class DataService:
-    def __init__(self, df: pd.DataFrame, fieldTypeMap: dict, idFieldName: str = "unique_id"):
+    def __init__(
+        self, df: pd.DataFrame, fieldTypeMap: dict, idFieldName: str = "unique_id"
+    ):
         self.df = df
         self.fieldTypeMap = fieldTypeMap
         self.idFieldName = idFieldName
@@ -19,29 +22,30 @@ class DataService:
         df["Day"] = df["Time"].dt.day
         df["Day of Week"] = df["Time"].dt.dayofweek
         df["Hour"] = df["Time"].dt.hour
-        df["Timestamp"] = (df["Time"] - pd.Timestamp("1970-01-01")) // pd.Timedelta('1s')
+        df["Timestamp"] = (df["Time"] - pd.Timestamp("1970-01-01")) // pd.Timedelta(
+            "1s"
+        )
 
     def get_eq_filtered_data(
         self,
-        APP_ROOT,
         columns,
         filter_col,
         filter_val,
     ):
         df = self.df
-        out_attributes =  columns + [self.idFieldName]
+        out_attributes = columns + [self.idFieldName]
         df_filtered = None
-        df_filtered = df[df[filter_col].astype(str) == str(filter_val)]
+        if filter_col != None:
+            df_filtered = df[df[filter_col].astype(str) == str(filter_val)]
         df_filtered = df_filtered[out_attributes]
         return df_filtered.to_json(orient="values")
-    
+
     def get_sorted_df(self, sortBy: str):
         df = self.df
         sortedDf = df.sort_values(by=sortBy, kind="stable")
         return sortedDf
 
     def get_diff_list(self, fieldName, linearOrderBy):
-        df = self.df
         # sort dataframe by df
         sortedDf = self.get_sorted_df(linearOrderBy)
         # get list of values for column fieldName
@@ -60,7 +64,7 @@ class DataService:
 
         # compute diffs
         diffList = []
-        for i in range(len(values)):
+        for i in tqdm (range(len(values)), desc="Computing diffs"):
             item = {}
             if i == 0:
                 item["diffPrev"] = None
@@ -84,12 +88,10 @@ class DataService:
     ) -> pd.DataFrame:
         filtered_df = self.df[queryFields + [xField, yField, self.idFieldName]]
         filtered_df = filtered_df[
-            (filtered_df[xField] >= float(x1))
-            & (filtered_df[xField] <= float(x2))
+            (filtered_df[xField] >= float(x1)) & (filtered_df[xField] <= float(x2))
         ]
         filtered_df = filtered_df[
-            (filtered_df[yField]>= float(y1))
-            & (filtered_df[xField] <= float(y2))
+            (filtered_df[yField] >= float(y1)) & (filtered_df[xField] <= float(y2))
         ]
         return filtered_df
 
@@ -98,5 +100,7 @@ class DataService:
     def add_values_by_id(self, fieldName, keyValuePairs):
         df = self.df
         for keyValuePair in keyValuePairs:
-            df.loc[df[self.idFieldName] == int(keyValuePair[0]), fieldName] = keyValuePair[1]
+            df.loc[
+                df[self.idFieldName] == int(keyValuePair[0]), fieldName
+            ] = keyValuePair[1]
         return df
