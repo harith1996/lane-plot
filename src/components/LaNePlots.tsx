@@ -10,11 +10,10 @@ export default function LaNePlots(props: PlotsProps) {
 	};
 	return (
 		<div>
-			Plots
+
 			{props.plots.map((plot) => {
 				return (
 					<div>
-						{JSON.stringify(plot.labels)}
 						<Scatterplot plot={plot} selectionCallback={onSelectionChange} ></Scatterplot>
 					</div>
 				);

@@ -37,3 +37,6 @@
     }
   }
   
+  .filter-group {
+    display: flex;
+  }

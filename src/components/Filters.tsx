@@ -84,8 +84,8 @@ export default function Filters({ onFilterChange }: any) {
 
 	return (
 		<div>
-			<div>
-				Filters
+			<div className="filter-group">
+				
 				<SingleSelect
 					options={sliceByOptions}
 					onChange={onSliceByChange}
@@ -99,7 +99,7 @@ export default function Filters({ onFilterChange }: any) {
 					selectedValue={sliceByValue}
 				></SingleSelect>
 			</div>
-			<div>
+			<div className="filter-group">
 				<MultiSelect></MultiSelect>
 			</div>
 		</div>
