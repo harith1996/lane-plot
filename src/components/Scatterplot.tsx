@@ -67,7 +67,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 			const yScale = d3
 				.scaleSymlog()
 				.domain(yDomain)
-				.rangeRound([height - margin.bottom, margin.top])
+				.rangeRound([ margin.top, height - margin.bottom])
 				.clamp(true);
 
 			const xTicks: [number, number] = d3.extent(xScale.domain()) as [
