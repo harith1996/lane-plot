@@ -1,4 +1,4 @@
-import modin.pandas as pd
+import pandas as pd
 import random
 from flask import Flask, redirect, url_for, request, jsonify
 from flask_cors import CORS
