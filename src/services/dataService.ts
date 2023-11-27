@@ -15,6 +15,12 @@ export default class DataService {
 		});
 	}
 
+	fetchFilterOptions(endpoints: string) {
+		return fetch(this.host + "/" + endpoints).then((response) =>
+			response.json()
+		);
+	}
+
 	fetchAttributes() {
 		return fetch(this.host + "/attributes")
 			.then((response) => response.json())
@@ -22,8 +28,8 @@ export default class DataService {
 	}
 
 	fetchData(
-		filterColumn: string = "page_id",
-		filterValue: string = "68401269",
+		filterColumn: string = "event_user_id",
+		filterValue: string = "15996738",
 		attributes: string[] = ["page_title_historical"]
 	) {
 		const reqAttributes = attributes.join(",");
