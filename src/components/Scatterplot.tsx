@@ -104,10 +104,34 @@ export default function Scatterplot(props: ScatterplotProps) {
 						.tickSizeOuter(0)
 				);
 
+			const xLabel = (g: any) => {
+				const x = width - margin.right;
+				const y = yScale(0) - 6;
+				return g
+					.attr("class", "x-label")
+					.attr("text-anchor", "end")
+					.attr("x", x)
+					.attr("y", y)
+					.text(plot.labels.xLabel);
+			};
+
+			const yLabel = (g: any) => {
+				const x = xScale(0) + 6;
+				const y = margin.top;
+				return g
+					.attr("class", "y-label")
+					.attr("text-anchor", "start")
+					.attr("x", x)
+					.attr("y", y)
+					.text(plot.labels.yLabel);
+			};
+
 			svg.select(".x-axis").call(xAxis);
 			svg.select(".y-axis").call(yAxis);
+			svg.select(".x-label").call(xLabel);
+			svg.select(".y-label").call(yLabel);
 
-			// Append the dots.
+			// Append the dots or bins.
 			const radius = 5;
 			const hexbin = d3Hexbin
 				.hexbin()
@@ -199,6 +223,8 @@ export default function Scatterplot(props: ScatterplotProps) {
 			>
 				<g className="plot-area" />
 				<g className="x-axis" />
+				<text className="x-label" />
+				<text className="y-label" />
 				<g className="y-axis" />
 				<g className="colorLegend" />
 			</svg>
