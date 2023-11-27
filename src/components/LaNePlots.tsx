@@ -2,7 +2,7 @@ import React from "react";
 import Scatterplot from "./Scatterplot";
 import { PlotsProps } from "../types/PlotsTypes";
 
-export default function Plots(props: PlotsProps) {
+export default function LaNePlots(props: PlotsProps) {
 	const [selectedData, setSelectedData] = React.useState<any[]>([]);
 
 	const onSelectionChange = (data: any) => {
