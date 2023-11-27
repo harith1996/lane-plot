@@ -155,6 +155,8 @@ export default function Scatterplot(props: ScatterplotProps) {
 				.data(bins)
 				.join("path")
 				.attr("d", hexbin.hexagon())
+				.transition()
+				.duration(300)
 				.attr("transform", (d) => `translate(${d.x},${d.y})`)
 				.attr("fill", (d) => colorScale(d.length));
 
