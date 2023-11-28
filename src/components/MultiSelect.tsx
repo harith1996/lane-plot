@@ -32,27 +32,28 @@ const names = [
   "Kelly Snyder",
 ];
 
-function getStyles(name: string, personName: readonly string[], theme: Theme) {
+function getStyles(option: string, selectedOptions: readonly string[], theme: Theme) {
   return {
     fontWeight:
-      personName.indexOf(name) === -1
+      selectedOptions.indexOf(option) === -1
         ? theme.typography.fontWeightRegular
         : theme.typography.fontWeightMedium,
   };
 }
 
-export default function MultipleSelectChip() {
+export default function MultipleSelectChip({label, options , defaultValue , onChange} : any) {
   const theme = useTheme();
-  const [personName, setPersonName] = React.useState<string[]>([]);
+  const [selectedOptions, setSelectedOptions] = React.useState<string[]>(defaultValue);
 
-  const handleChange = (event: SelectChangeEvent<typeof personName>) => {
+  const handleChange = (event: SelectChangeEvent<typeof selectedOptions>) => {
     const {
       target: { value },
     } = event;
-    setPersonName(
-      // On autofill we get a stringified value.
-      typeof value === "string" ? value.split(",") : value
+    const newSelectedOptions = typeof value === "string" ? value.split(",") : value
+    setSelectedOptions(
+      newSelectedOptions
     );
+    onChange(newSelectedOptions);
   };
 
   return (
@@ -63,9 +64,9 @@ export default function MultipleSelectChip() {
           labelId="demo-multiple-chip-label"
           id="demo-multiple-chip"
           multiple
-          value={personName}
+          value={selectedOptions}
           onChange={handleChange}
-          input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+          input={<OutlinedInput id="select-multiple-chip" label={label} />}
           renderValue={(selected) => (
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
               {selected.map((value) => (
@@ -75,13 +76,13 @@ export default function MultipleSelectChip() {
           )}
           MenuProps={MenuProps}
         >
-          {names.map((name) => (
+          {options.map((option : string) => (
             <MenuItem
-              key={name}
-              value={name}
-              style={getStyles(name, personName, theme)}
+              key={option}
+              value={option}
+              style={getStyles(option, selectedOptions, theme)}
             >
-              {name}
+              {option}
             </MenuItem>
           ))}
         </Select>

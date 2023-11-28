@@ -1,37 +1,66 @@
-export const FILTER_LAYOUT = {
-	singleSelect: [
-		// linearizeBy: {
-		// 	label: "Linearize By",
-		// 	fetchFrom: "linearizeables",
-		// },
-		{
-			name: "linearizeBy",
-			label: "Linearize By",
-			fetchOptionsFrom: "linearizeables",
-			
-		},
-		{
-			name: "eventType",
-			label: "Event Type",
-			fetchOptionsFrom: "eventTypes",
-		},
-		{
-			name: "sliceBy",
-			label: "Slice By",
-			fetchOptionsFrom: "sliceables",
-		},
-		{
-			name: "sliceByValue",
-			label: "Slice By Value",
-			fetchOptionsFrom: "sliceableValues",
-		},
-	],
+import DataService from "../services/dataService";
 
-	multiSelect: [
-		{
-			name: "shownPlots",
-			label: "Shown Plots",
-			fetchOptionsFrom: "diffableAttributes",
-		},
-	],
+type Filter = {
+	name: string;
+	label: string;
+	type: string;
+	fetchOptionsFrom: string;
+	options: any;
 };
+export const FILTER_LAYOUT: Filter[] = [
+	// linearizeBy: {
+	// 	label: "Linearize By",
+	// 	fetchFrom: "linearizeables",
+	// },
+	{
+		name: "linearizeBy",
+		label: "Linearize By",
+		type: "singleSelect",
+		fetchOptionsFrom: "linearizeables",
+		options: [],
+	},
+	{
+		name: "eventType",
+		label: "Event Type",
+		type: "singleSelect",
+		fetchOptionsFrom: "eventTypes",
+		options: [],
+	},
+	{
+		name: "sliceBy",
+		label: "Slice By",
+		type: "singleSelect",
+		fetchOptionsFrom: "sliceables",
+		options: [],
+	},
+	{
+		name: "sliceByValue",
+		label: "Slice By Value",
+		type: "singleSelect",
+		fetchOptionsFrom: "sliceableValues",
+		options: [],
+	},
+	{
+		name: "shownPlots",
+		label: "Shown Plots",
+		type: "multiSelect",
+		fetchOptionsFrom: "diffableAttributes",
+		options: [],
+	},
+];
+
+export function populateFilterOptions(filter: Filter, ds: DataService) {
+	return ds.fetchFilterOptions(filter.fetchOptionsFrom).then((options) => {
+		filter.options = options;
+		return options;
+	});
+}
+
+export function fetchFilterOptions(
+	filterLayout = FILTER_LAYOUT,
+	ds: DataService
+) {
+	return filterLayout.map((filter) => {
+		return populateFilterOptions(filter, ds);
+	});
+}
