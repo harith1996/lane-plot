@@ -11,9 +11,9 @@ export default function LaNePlots(props: PlotsProps) {
 	return (
 		<div>
 
-			{props.plots.map((plot) => {
+			{props.plots.map((plot, index) => {
 				return (
-					<div>
+					<div key={index}>
 						<Scatterplot plot={plot} selectionCallback={onSelectionChange} ></Scatterplot>
 					</div>
 				);
