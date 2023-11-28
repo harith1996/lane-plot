@@ -81,7 +81,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 			];
 
 			const xAxis = (g: any) =>
-				g.attr("transform", `translate(0,${yScale(0)})`).call(
+				g.transition().attr("transform", `translate(0,${yScale(0)})`).call(
 					d3
 						.axisBottom(xScale)
 						.tickValues(
@@ -93,7 +93,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 				);
 
 			const yAxis = (g: any) =>
-				g.attr("transform", `translate(${xScale(0)},0)`).call(
+				g.transition().attr("transform", `translate(${xScale(0)},0)`).call(
 					d3
 						.axisLeft(yScale)
 						.tickValues(
@@ -108,7 +108,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 				const x = width - margin.right;
 				const y = yScale(0) - 6;
 				return g
-					.attr("class", "x-label")
+					.transition().attr("class", "x-label")
 					.attr("text-anchor", "end")
 					.attr("x", x)
 					.attr("y", y)
@@ -119,7 +119,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 				const x = xScale(0) + 6;
 				const y = margin.top;
 				return g
-					.attr("class", "y-label")
+					.transition().attr("class", "y-label")
 					.attr("text-anchor", "start")
 					.attr("x", x)
 					.attr("y", y)
@@ -142,6 +142,8 @@ export default function Scatterplot(props: ScatterplotProps) {
 					[margin.left, margin.top],
 					[width - margin.right, height - margin.bottom],
 				]);
+				
+			/*************** BINNED SCATTERPLOT */
 			let bins = hexbin(data.map((d) => [d.x, d.y]));
 			const colorScale = d3
 				.scaleSequentialSymlog(d3.interpolateBlues)
@@ -170,7 +172,6 @@ export default function Scatterplot(props: ScatterplotProps) {
 					"transform",
 					`translate(${margin.left},${height - margin.bottom + 30})`
 				);
-			/*************** BINNED SCATTERPLOT */
 
 			/*************** SCATTERPLOT
 			const dot = plotArea
