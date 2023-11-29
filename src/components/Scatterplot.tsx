@@ -218,8 +218,8 @@ export default function Scatterplot(props: ScatterplotProps) {
 			<svg
 				ref={ref}
 				style={{
-					height: 1000,
-					width: 1000,
+					height: 700,
+					width: 700,
 					marginRight: "0px",
 					marginLeft: "0px",
 				}}
