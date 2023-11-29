@@ -7,13 +7,13 @@ import DataService from "./services/dataService";
 import { fetchFilterOptions, FILTER_LAYOUT } from "./layout/filterLayout";
 import { LaNePlotFilters } from "./types/FilterTypes";
 
-const ds = new DataService("http://localhost:5000");
+const HOST = "http://localhost:5000";
+const ds = new DataService(HOST);
 
-function getPlot(filters: LaNePlotFilters, data: any) {
-	const xLabel = ["diffNext", filters.shownPlots[0]].join("_");
-	const yLabel = ["diffPrev", filters.shownPlots[0]].join("_");
-	const plotData = ds.plotsifyData(data, xLabel, yLabel);
-
+function getPlot(shownPlot: string, data: any, attList: any) {
+	const xLabel = ["diffNext", shownPlot].join("_");
+	const yLabel = ["diffPrev", shownPlot].join("_");
+	const plotData = ds.plotsifyData(data, xLabel, yLabel, attList);
 	return {
 		labels: {
 			xLabel: xLabel,
@@ -38,9 +38,19 @@ function App() {
 	});
 	useEffect(() => {
 		//fetch new data for plot
-		ds.fetchData(filterMap.sliceBy, filterMap.sliceByValue).then((data) => {
-			console.log(data);
-			setActivePlots([getPlot(filterMap, data)]);
+		const activePlots = [];
+		filterMap.shownPlots.forEach((shownPlot) => {
+			ds.fetchData(filterMap.sliceBy, filterMap.sliceByValue, shownPlot).then(
+				({data, reqAttributes}) => {
+					console.log(data);
+					const attList = reqAttributes.split(",");
+					setActivePlots(
+						filterMap.shownPlots.map((shownPlot) =>
+							getPlot(shownPlot, data, attList)
+						)
+					);
+				}
+			);
 		});
 
 		//fetch new filter options
