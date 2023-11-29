@@ -48,6 +48,41 @@ class DataService:
         filteredDf = df[df[filterBy].astype(str) == str(filterValue)]
         return filteredDf
 
+    def get_filter_values(self, filterMap: dict, df=None):
+        out = dict()
+        for filterName in filterMap:
+            match filterName:
+                case "linearizeBy":
+                    out[filterName] = []
+                case "sliceBy":
+                    out[filterName] = [
+                        "page_id",
+                        "event_user_id",
+                    ]
+                case "sliceByValue":
+                    match filterMap["sliceBy"]:
+                        case "page_id":
+                            out[filterName] = [
+                                "74804817",
+                                "1952670",
+                                "74199488",
+                                "70308452",
+                                "68401269",
+                            ]
+                        case "event_user_id":
+                            out[filterName] = [
+                                "3455093",
+                                "7903804",
+                                "7852030",
+                                "2842084",
+                                "15996738",
+                            ]
+                case "shownPlots":
+                    out[filterName] = ["revision_text_bytes", "event_timestamp"]
+                case _:
+                    out[filterName] = []
+        return out
+
     # TODO: add values directly to dataframe
     def get_diff_list(self, fieldName, linearOrderBy, df=None):
         # sort dataframe by df
@@ -71,7 +106,7 @@ class DataService:
 
         # compute diffs
         diffList = []
-        if(len(values) == 1):
+        if len(values) == 1:
             diffList = []
         else:
             for i in range(len(values)):

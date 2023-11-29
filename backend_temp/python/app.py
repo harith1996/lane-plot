@@ -88,6 +88,11 @@ def get_data():
     attributes = request.args.get("attributes").split(",")
     return ds.get_eq_filtered_data(attributes, filter_col, filter_val)
 
+@app.route(f"/filters", methods = ['POST'])
+def get_filter_values():
+    filterMap = request.get_json()
+    return ds.get_filter_values(filterMap)
+
 
 @app.route(f"/get-diff-list")
 def get_diff_list():
