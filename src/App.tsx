@@ -38,21 +38,25 @@ function App() {
 	});
 	useEffect(() => {
 		//fetch new data for plot
-		const activePlots = [];
-		filterMap.shownPlots.forEach((shownPlot) => {
-			ds.fetchData(filterMap.sliceBy, filterMap.sliceByValue, shownPlot).then(
-				({data, reqAttributes}) => {
-					console.log(data);
-					const attList = reqAttributes.split(",");
-					setActivePlots(
-						filterMap.shownPlots.map((shownPlot) =>
-							getPlot(shownPlot, data, attList)
-						)
-					);
-				}
+		const dataPromises = filterMap.shownPlots.map((shownPlot) => {
+			return ds.fetchData(
+				filterMap.sliceBy,
+				filterMap.sliceByValue,
+				shownPlot
 			);
 		});
-
+		const plotPromises = Promise.all(dataPromises).then((datasets) => {
+			return datasets.map((dataset) => {
+				const reqAttributes = dataset.reqAttributes;
+				const data = dataset.data;
+				const shownPlot = dataset.shownPlot;
+				const attList = reqAttributes.split(",");
+				return getPlot(shownPlot, data, attList);
+			});
+		});
+		plotPromises.then((plots) => {
+			setActivePlots(plots);
+		});
 		//fetch new filter options
 	}, [filterMap]);
 	const onFilterChange = (filterMap: LaNePlotFilters) => {

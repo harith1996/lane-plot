@@ -45,7 +45,7 @@ export default class DataService {
 		)
 			.then((response) => response.json())
 			.then((data) => {
-				return { data, reqAttributes };
+				return { data, reqAttributes, shownPlot };
 			});
 	}
 
