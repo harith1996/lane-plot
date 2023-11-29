@@ -5,3 +5,4 @@ flask-cors
 virtualenv
 joblib
 modin
+tqdm
