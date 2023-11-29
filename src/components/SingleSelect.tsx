@@ -26,7 +26,7 @@ export default function SelectAutoWidth(props: SingleSelectProps) {
 				<Select
 					labelId="demo-simple-select-autowidth-label"
 					id="demo-simple-select-autowidth"
-					value={props.	selectedValue}
+					value={props.selectedValue}
 					onChange={handleChange}
 					autoWidth
 					label={props.label}
