@@ -28,3 +28,7 @@ __pycache__
 
 # Pycharm Idea
 .idea/
+
+# Exclude raw and processed files
+*.pkl
+

@@ -1,15 +1,18 @@
 import time
 import requests
+import pickle
 
 if __name__=="__main__":
-    history_url = "https://api.wikimedia.org/core/v1/wikipedia/en/page/Earth/history"
+    article_name = "Earth"
+    history_url = "https://api.wikimedia.org/core/v1/wikipedia/en/page/"+article_name+"/history"
 
     revisions = []
 
     start_time = time.time()
     try:
         while True:
-            print("Iteration", str(len(revisions)//20))
+            if len(revisions)%100 == 0:
+                print("Iteration", str(len(revisions)//20))
             response = requests.get(history_url).json()
 
             revisions += response["revisions"]
@@ -22,3 +25,6 @@ if __name__=="__main__":
         print("Exception:", error)
     end_time = time.time()
     print("Fetching of",str(len(revisions)),"revisions took", end_time-start_time, "seconds")
+
+    with open('wiki_raw/'+article_name+'.pkl', 'wb') as f:
+        pickle.dump(revisions, f)
