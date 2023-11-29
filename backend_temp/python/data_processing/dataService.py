@@ -77,6 +77,8 @@ class DataService:
                                 "2842084",
                                 "15996738",
                             ]
+                        case _:
+                            out[filterName] = []
                 case "shownPlots":
                     out[filterName] = ["revision_text_bytes", "event_timestamp"]
                 case _:
