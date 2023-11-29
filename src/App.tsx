@@ -34,7 +34,7 @@ function App() {
 		eventType: "revision_create",
 		sliceBy: "page_id",
 		sliceByValue: "74804817",
-		shownPlots: ["revision_text_bytes"],
+		shownPlots: ["revision_text_bytes", "event_timestamp"],
 	});
 	useEffect(() => {
 		//fetch new data for plot
