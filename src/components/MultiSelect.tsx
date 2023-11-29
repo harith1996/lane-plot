@@ -41,9 +41,9 @@ function getStyles(option: string, selectedOptions: readonly string[], theme: Th
   };
 }
 
-export default function MultipleSelectChip({label, options , defaultValue , onChange} : any) {
+export default function MultipleSelectChip({label, options , preselected , onChange} : any) {
   const theme = useTheme();
-  const [selectedOptions, setSelectedOptions] = React.useState<string[]>(defaultValue);
+  const [selectedOptions, setSelectedOptions] = React.useState<string[]>(preselected);
 
   const handleChange = (event: SelectChangeEvent<typeof selectedOptions>) => {
     const {

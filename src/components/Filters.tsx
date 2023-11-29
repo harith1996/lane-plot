@@ -95,23 +95,23 @@ export default function Filters({ selectedFilters, onFilterChange }: { selectedF
 		<div>
 			<div className="filter-group">
 				<SingleSelect
-					options={sliceByOptions}
-					onChange={onSliceByChange}
 					label={sliceByLabel}
-					selectedValue={sliceBy}
+					options={sliceByOptions}
+					preselected={sliceBy}
+					onChange={onSliceByChange}
 				></SingleSelect>
 				<SingleSelect
-					options={sliceByValueOptions}
-					onChange={onSliceByValueChange}
 					label={sliceBy}
-					selectedValue={sliceByValue}
+					options={sliceByValueOptions}
+					preselected={sliceByValue}
+					onChange={onSliceByValueChange}
 				></SingleSelect>
 			</div>
 			<div className="filter-group">
 				<MultiSelect
 					label={"Shown Plots"}
 					options={shownPlotsOptions}
-					defaultValue={["revision_text_bytes"]}
+					preselected={shownPlots}
 					onChange={onShownPlotsChange}
 				></MultiSelect>
 			</div>
