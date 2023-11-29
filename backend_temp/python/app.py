@@ -86,7 +86,7 @@ def get_data():
     filter_col = request.args.get("filterColumn")
     filter_val = request.args.get("filterValue")
     attributes = request.args.get("attributes").split(",")
-    return ds.get_eq_filtered_data(list(df.columns), filter_col, filter_val)
+    return ds.get_eq_filtered_data(attributes, filter_col, filter_val)
 
 
 @app.route(f"/get-diff-list")
