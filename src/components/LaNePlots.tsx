@@ -9,7 +9,7 @@ export default function LaNePlots(props: PlotsProps) {
 		console.log(data);
 	};
 	return (
-		<div>
+		<div className="lane-plots">
 
 			{props.plots.map((plot, index) => {
 				return (

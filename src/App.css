@@ -40,3 +40,9 @@
   .filter-group {
     display: flex;
   }
+
+  .lane-plots {
+    width: 100%;
+    display: flex;
+    
+  }

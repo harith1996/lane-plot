@@ -219,7 +219,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 				ref={ref}
 				style={{
 					height: 1000,
-					width: "100%",
+					width: 1000,
 					marginRight: "0px",
 					marginLeft: "0px",
 				}}
