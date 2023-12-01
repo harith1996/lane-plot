@@ -12,7 +12,6 @@ type SingleSelectProps = {
 };
 
 export default function SelectAutoWidth(props: SingleSelectProps) {
-  const [selectedValue, setSelectedValue] = React.useState<string>();
 	const handleChange = (event: SelectChangeEvent) => {
 		props.onChange(event.target.value as string);
 	};
@@ -32,7 +31,11 @@ export default function SelectAutoWidth(props: SingleSelectProps) {
 					label={props.label}
 				>
 					{props.options.map((option) => {
-						return <MenuItem key={option} value={option}>{option}</MenuItem>;
+						return (
+							<MenuItem key={option} value={option}>
+								{option}
+							</MenuItem>
+						);
 					})}
 				</Select>
 			</FormControl>

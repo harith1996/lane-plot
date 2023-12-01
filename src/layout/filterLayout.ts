@@ -48,19 +48,3 @@ export const FILTER_LAYOUT: Filter[] = [
 		options: [],
 	},
 ];
-
-export function populateFilterOptions(filter: Filter, ds: DataService) {
-	return ds.fetchFilterOptions(filter.fetchOptionsFrom).then((options) => {
-		filter.options = options;
-		return options;
-	});
-}
-
-export function fetchFilterOptions(
-	filterLayout = FILTER_LAYOUT,
-	ds: DataService
-) {
-	return filterLayout.map((filter) => {
-		return populateFilterOptions(filter, ds);
-	});
-}

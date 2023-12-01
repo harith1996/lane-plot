@@ -1,35 +1,56 @@
-import React from "react";
+import React, { useEffect } from "react";
 import SingleSelect from "./SingleSelect";
 import MultiSelect from "./MultiSelect";
-import { LaNePlotFilters } from "../types/FilterTypes";
+import { LaNePlotFilterOptions, LaNePlotFilters } from "../types/FilterTypes";
 
-export default function Filters({ selectedFilters, onFilterChange }: { selectedFilters: LaNePlotFilters, onFilterChange: any}) {
+export default function Filters({
+	filterValues,
+	filterOptions,
+	onFilterChange,
+}: {
+	filterValues: LaNePlotFilters;
+	filterOptions: LaNePlotFilterOptions;
+	onFilterChange: any;
+}) {
 	//Filter states
-	const [linearizeBy, setLinearizeBy] = React.useState<string>(selectedFilters.linearizeBy);
-	const [eventType, setEventType] = React.useState<string>(selectedFilters.eventType);
-	const [sliceBy, setSliceBy] = React.useState<string>(selectedFilters.sliceBy);
-	const [sliceByValue, setSliceByValue] = React.useState<any>(selectedFilters.sliceByValue);
-	const [shownPlots, setShownPlots] = React.useState<string[]>(selectedFilters.shownPlots);
+	const [linearizeBy, setLinearizeBy] = React.useState<string>(
+		filterValues.linearizeBy
+	);
+	const [eventType, setEventType] = React.useState<string>(
+		filterValues.eventType
+	);
+	const [sliceBy, setSliceBy] = React.useState<string>(filterValues.sliceBy);
+	const [sliceByValue, setSliceByValue] = React.useState<any>(
+		filterValues.sliceByValue
+	);
+	const [shownPlots, setShownPlots] = React.useState<string[]>(
+		filterValues.shownPlots
+	);
 
 	const [eventTypeOptions, setEventTypeOptions] = React.useState<string[]>(
 		[]
 	);
-	const [sliceByOptions, setSliceByOptions] = React.useState<string[]>([
-		"page_id",
-		"event_user_id",
-	]); //TODO: fetch from server
+	const [sliceByOptions, setSliceByOptions] = React.useState<string[]>([]); //TODO: fetch from server
 	const [sliceByValueOptions, setSliceByValueOptions] = React.useState<any[]>(
-		["74804817", "1952670", "74199488", "70308452", "68401269"]
+		[]
 	);
-	const [shownPlotsOptions, setShownPlotsOptions] = React.useState<string[]>([
-		"revision_text_bytes",
-		"event_timestamp",
-	]);
+	const [shownPlotsOptions, setShownPlotsOptions] = React.useState<string[]>(
+		[]
+	);
 	const [linearizeByOptions, setLinearizeByOptions] = React.useState<
 		string[]
 	>([]);
 	const linearizeLabel = "Linearize By";
 	const sliceByLabel = "Slice By";
+
+	useEffect(() => {
+		//set all options
+		setEventTypeOptions([...filterOptions.eventType]);
+		setSliceByOptions([...filterOptions.sliceBy]);
+		setSliceByValueOptions([...filterOptions.sliceByValue]);
+		setShownPlotsOptions([...filterOptions.shownPlots]);
+		setLinearizeByOptions([...filterOptions.linearizeBy]);
+	}, [filterOptions]);
 
 	const onLinearizeByChange = (value: string) => {
 		setLinearizeBy(value);
@@ -41,40 +62,19 @@ export default function Filters({ selectedFilters, onFilterChange }: { selectedF
 	};
 	const onSliceByChange = (value: string) => {
 		setSliceBy(value);
-		let defaultSliceByValue = "";
-		switch (value) {
-			case "page_id":
-				setSliceByValueOptions([
-					"74804817",
-					"1952670",
-					"74199488",
-					"70308452",
-					"68401269",
-				]); //TODO: fetch from server
-				defaultSliceByValue = "74804817";
-				break;
-			case "event_user_id":
-				setSliceByValueOptions([
-					"3455093",
-					"7903804",
-					"7852030",
-					"2842084",
-					"15996738",
-				]); //TODO: fetch from server
-				defaultSliceByValue = "3455093";
-				break;
-			//fetch new data
-		}
-		setSliceByValue(defaultSliceByValue);
 		onFilterChange({
+			linearizeBy: linearizeBy,
+			eventType: eventType,
 			sliceBy: value,
-			sliceByValue: defaultSliceByValue,
+			sliceByValue: sliceByValue,
 			shownPlots: shownPlots,
 		});
 	};
 	const onSliceByValueChange = (value: any) => {
 		setSliceByValue(value);
 		onFilterChange({
+			linearizeBy: linearizeBy,
+			eventType: eventType,
 			sliceBy: sliceBy,
 			sliceByValue: value,
 			shownPlots: shownPlots,
@@ -83,8 +83,9 @@ export default function Filters({ selectedFilters, onFilterChange }: { selectedF
 	};
 	const onShownPlotsChange = (value: string[]) => {
 		setShownPlots(value);
-		
 		onFilterChange({
+			linearizeBy: linearizeBy,
+			eventType: eventType,
 			sliceBy: sliceBy,
 			sliceByValue: sliceByValue,
 			shownPlots: value,

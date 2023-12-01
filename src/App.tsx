@@ -4,8 +4,8 @@ import Filters from "./components/Filters";
 import LaNePlots from "./components/LaNePlots";
 import { Plot } from "./types/PlotsTypes";
 import DataService from "./services/dataService";
-import { fetchFilterOptions, FILTER_LAYOUT } from "./layout/filterLayout";
-import { LaNePlotFilters } from "./types/FilterTypes";
+import { FILTER_LAYOUT } from "./layout/filterLayout";
+import { LaNePlotFilterOptions, LaNePlotFilters } from "./types/FilterTypes";
 
 const HOST = "http://localhost:5000";
 const ds = new DataService(HOST);
@@ -30,35 +30,48 @@ function getPlot(shownPlot: string, data: any, attList: any) {
 function App() {
 	const [activePlots, setActivePlots] = React.useState<Plot[]>([]);
 	const [filterMap, setFilterMap] = React.useState<LaNePlotFilters>({
-		linearizeBy: "event_timestamp",
-		eventType: "revision_create",
-		sliceBy: "page_id",
-		sliceByValue: "74804817",
-		shownPlots: ["revision_text_bytes", "event_timestamp"],
+		linearizeBy: "",
+		eventType: "",
+		sliceBy: "",
+		sliceByValue: "",
+		shownPlots: [],
+	});
+	const [filterOptions, setFilterOptions] = React.useState<LaNePlotFilterOptions>({
+		linearizeBy: [],
+		eventType: [],
+		sliceBy: [],
+		sliceByValue: [],
+		shownPlots: [],
 	});
 	useEffect(() => {
-		//fetch new data for plot
-		const dataPromises = filterMap.shownPlots.map((shownPlot) => {
-			return ds.fetchData(
-				filterMap.sliceBy,
-				filterMap.sliceByValue,
-				shownPlot
-			);
-		});
-		const plotPromises = Promise.all(dataPromises).then((datasets) => {
-			return datasets.map((dataset) => {
-				const reqAttributes = dataset.reqAttributes;
-				const data = dataset.data;
-				const shownPlot = dataset.shownPlot;
-				const attList = reqAttributes.split(",");
-				return getPlot(shownPlot, data, attList);
+		//fetch filter options
+		ds.fetchFilterOptions(filterMap).then((filterOptions) => {
+			//set filter options
+			setFilterOptions(filterOptions)
+			const dataPromises = filterMap.shownPlots.map((shownPlot) => {
+				return ds.fetchData(
+					filterMap.sliceBy,
+					filterMap.sliceByValue,
+					shownPlot
+				);
+			});
+			const plotPromises = Promise.all(dataPromises).then((datasets) => {
+				return datasets.map((dataset) => {
+					const reqAttributes = dataset.reqAttributes;
+					const data = dataset.data;
+					const shownPlot = dataset.shownPlot;
+					const attList = reqAttributes.split(",");
+					return getPlot(shownPlot, data, attList);
+				});
+			});
+			plotPromises.then((plots) => {
+				setActivePlots(plots);
 			});
 		});
-		plotPromises.then((plots) => {
-			setActivePlots(plots);
-		});
+
 		//fetch new filter options
 	}, [filterMap]);
+	
 	const onFilterChange = (filterMap: LaNePlotFilters) => {
 		setFilterMap(filterMap);
 	};
@@ -67,7 +80,8 @@ function App() {
 		<div className="App">
 			<div>
 				<Filters
-					selectedFilters={filterMap}
+					filterValues={filterMap}
+					filterOptions={filterOptions}
 					onFilterChange={onFilterChange}
 				></Filters>
 			</div>

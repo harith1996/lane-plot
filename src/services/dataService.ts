@@ -1,3 +1,5 @@
+import { LaNePlotFilters } from "../types/FilterTypes";
+
 export default class DataService {
 	host: string;
 	attributes: string[];
@@ -17,8 +19,16 @@ export default class DataService {
 		});
 	}
 
-	fetchFilterOptions(endpoints: string) {
-		return fetch(this.host + "/" + endpoints).then((response) =>
+	fetchFilterOptions(filterMap: LaNePlotFilters) {
+		const reqBody = JSON.stringify(filterMap);
+
+		return fetch(this.host + "/filters", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: reqBody
+		}).then((response) =>
 			response.json()
 		);
 	}
