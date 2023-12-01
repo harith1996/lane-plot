@@ -3,6 +3,37 @@ import SingleSelect from "./SingleSelect";
 import MultiSelect from "./MultiSelect";
 import { LaNePlotFilterOptions, LaNePlotFilters } from "../types/FilterTypes";
 
+class Filter {
+	constructor(
+		public label: string,
+		public type: string,
+		public endpoint: string,
+		public dependsOn: Filter | null = null,
+		public value: string,
+		public options: string[],
+		public onChange: any,
+		public fetchOptions: () => Promise<string[]>
+	) {
+		this.label = label;
+		this.type = type;
+		this.endpoint = endpoint;
+		this.dependsOn = dependsOn;
+		this.value = "";
+		this.options = [];
+		this.onChange = () => {};
+		this.fetchOptions = fetchOptions;
+	}
+
+	initialize() {
+		//fetch options from endpoint
+		//set options
+		this.fetchOptions().then((options) => {
+			this.options = options;
+			this.value = options.length > 0 ? this.options[0] : "";
+		});
+	}
+}
+
 export default function Filters({
 	filterValues,
 	filterOptions,
@@ -98,13 +129,13 @@ export default function Filters({
 				<SingleSelect
 					label={sliceByLabel}
 					options={sliceByOptions}
-					preselected={sliceBy}
+					selectedValue={sliceBy}
 					onChange={onSliceByChange}
 				></SingleSelect>
 				<SingleSelect
 					label={sliceBy}
 					options={sliceByValueOptions}
-					preselected={sliceByValue}
+					selectedValue={sliceByValue}
 					onChange={onSliceByValueChange}
 				></SingleSelect>
 			</div>

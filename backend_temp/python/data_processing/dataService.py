@@ -49,7 +49,13 @@ class DataService:
         return filteredDf
 
     def get_filter_values(self, filterMap: dict, df=None):
-        out = dict()
+        out = {
+            "linearizeBy": [],
+            "sliceBy": [],
+            "sliceByValue": [],
+            "shownPlots": [],
+            "eventType": [],
+        }
         for filterName in filterMap:
             match filterName:
                 case "linearizeBy":
@@ -81,6 +87,8 @@ class DataService:
                             out[filterName] = []
                 case "shownPlots":
                     out[filterName] = ["revision_text_bytes", "event_timestamp"]
+                case "eventType":
+                    out[filterName] = []
                 case _:
                     out[filterName] = []
         return out

@@ -5,7 +5,7 @@ import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 
 type SingleSelectProps = {
-	preselected: string;
+	selectedValue: string;
 	label: string;
 	options: string[];
 	onChange: (value: string) => void;
@@ -15,6 +15,7 @@ export default function SelectAutoWidth(props: SingleSelectProps) {
 	const handleChange = (event: SelectChangeEvent) => {
 		props.onChange(event.target.value as string);
 	};
+		
 
 	return (
 		<div>
@@ -25,7 +26,7 @@ export default function SelectAutoWidth(props: SingleSelectProps) {
 				<Select
 					labelId="demo-simple-select-autowidth-label"
 					id="demo-simple-select-autowidth"
-					value={props.preselected}
+					value={props.selectedValue}
 					onChange={handleChange}
 					autoWidth
 					label={props.label}
