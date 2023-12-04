@@ -11,6 +11,7 @@ export type PlotOptions = {
 export type PlotDataPoint = {
 	x: number;
 	y: number;
+	id: number;
 };
 
 export type Plot = {
