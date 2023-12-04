@@ -13,7 +13,8 @@ const ds = new DataService(HOST);
 function getPlot(shownPlot: string, data: any, attList: any) {
 	const xLabel = ["diffNext", shownPlot].join("_");
 	const yLabel = ["diffPrev", shownPlot].join("_");
-	const plotData = ds.plotsifyData(data, xLabel, yLabel, attList);
+	const idField = "unique_id"
+	const plotData = ds.plotsifyData(data, xLabel, yLabel, idField, attList);
 	return {
 		labels: {
 			xLabel: xLabel,
