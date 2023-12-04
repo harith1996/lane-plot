@@ -59,12 +59,13 @@ export default class DataService {
 			});
 	}
 
-	plotsifyData(data: any, xField: string, yField: string, attList: string[]) {
+	plotsifyData(data: any, xField: string, yField: string, idField:string, attList: string[]) {
 		let xIndex = attList.indexOf(xField);
 		let yIndex = attList.indexOf(yField);
+		let idIndex = attList.indexOf(idField);
 		let out = [];
 		for (let i = 0; i < data.length; i++) {
-			out.push({ x: data[i][xIndex], y: data[i][yIndex] });
+			out.push({ x: data[i][xIndex], y: data[i][yIndex], id: data[i][idIndex] });
 		}
 		return out;
 	}
