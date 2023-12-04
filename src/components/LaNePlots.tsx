@@ -6,7 +6,7 @@ export default function LaNePlots(props: PlotsProps) {
 	const [selectedData, setSelectedData] = React.useState<any[]>([]);
 
 	const onSelectionChange = (data: any) => {
-		console.log(data);
+		setSelectedData(data);
 	};
 	return (
 		<div className="lane-plots">
@@ -14,7 +14,7 @@ export default function LaNePlots(props: PlotsProps) {
 			{props.plots.map((plot, index) => {
 				return (
 					<div key={index}>
-						<Scatterplot plot={plot} selectionCallback={onSelectionChange} ></Scatterplot>
+						<Scatterplot plot={plot} selectionCallback={onSelectionChange} selectedIds={selectedData}></Scatterplot>
 					</div>
 				);
 			})}

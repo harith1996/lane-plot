@@ -7,6 +7,7 @@ import Legend from "../d3/Legend";
 type ScatterplotProps = {
 	plot: Plot;
 	selectionCallback: any;
+	selectedIds: string[];
 };
 
 function getDomains(
@@ -46,6 +47,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 	const plot = props.plot;
 	const selectionCallback = props.selectionCallback;
 	const data = plot.data;
+	const selectedIds = props.selectedIds;
 	const ref = useD3(
 		(svg) => {
 			const height = 700;
@@ -67,7 +69,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 			const yScale = d3
 				.scaleSymlog()
 				.domain(yDomain)
-				.rangeRound([ margin.top, height - margin.bottom])
+				.rangeRound([margin.top, height - margin.bottom])
 				.clamp(true);
 
 			const xTicks: [number, number] = d3.extent(xScale.domain()) as [
@@ -81,34 +83,41 @@ export default function Scatterplot(props: ScatterplotProps) {
 			];
 
 			const xAxis = (g: any) =>
-				g.transition().attr("transform", `translate(0,${yScale(0)})`).call(
-					d3
-						.axisBottom(xScale)
-						.tickValues(
-							d3
-								.ticks(...xTicks, width / 80)
-								.filter((v) => xScale(v) !== undefined)
-						)
-						.tickSizeOuter(0)
-				);
+				g
+					.transition()
+					.attr("transform", `translate(0,${yScale(0)})`)
+					.call(
+						d3
+							.axisBottom(xScale)
+							.tickValues(
+								d3
+									.ticks(...xTicks, width / 80)
+									.filter((v) => xScale(v) !== undefined)
+							)
+							.tickSizeOuter(0)
+					);
 
 			const yAxis = (g: any) =>
-				g.transition().attr("transform", `translate(${xScale(0)},0)`).call(
-					d3
-						.axisLeft(yScale)
-						.tickValues(
-							d3
-								.ticks(...yTicks, height / 80)
-								.filter((v) => xScale(v) !== undefined)
-						)
-						.tickSizeOuter(0)
-				);
+				g
+					.transition()
+					.attr("transform", `translate(${xScale(0)},0)`)
+					.call(
+						d3
+							.axisLeft(yScale)
+							.tickValues(
+								d3
+									.ticks(...yTicks, height / 80)
+									.filter((v) => xScale(v) !== undefined)
+							)
+							.tickSizeOuter(0)
+					);
 
 			const xLabel = (g: any) => {
 				const x = width - margin.right;
 				const y = yScale(0) - 6;
 				return g
-					.transition().attr("class", "x-label")
+					.transition()
+					.attr("class", "x-label")
 					.attr("text-anchor", "end")
 					.attr("x", x)
 					.attr("y", y)
@@ -119,7 +128,8 @@ export default function Scatterplot(props: ScatterplotProps) {
 				const x = xScale(0) + 6;
 				const y = margin.top;
 				return g
-					.transition().attr("class", "y-label")
+					.transition()
+					.attr("class", "y-label")
 					.attr("text-anchor", "start")
 					.attr("x", x)
 					.attr("y", y)
@@ -135,21 +145,48 @@ export default function Scatterplot(props: ScatterplotProps) {
 			const radius = 5;
 			const hexbin = d3Hexbin
 				.hexbin()
-				.x((d) => xScale(d[0]))
-				.y((d) => yScale(d[1]))
+				// @ts-ignore
+				.x((d) => xScale(d.x))
+				// @ts-ignore
+				.y((d) => yScale(d.y))
 				.radius((radius * width) / (height - 1))
 				.extent([
 					[margin.left, margin.top],
 					[width - margin.right, height - margin.bottom],
 				]);
-				
-			/*************** BINNED SCATTERPLOT */
-			let bins = hexbin(data.map((d) => [d.x, d.y]));
+
+			// @ts-ignore
+			let bins = hexbin(data);
+
+			bins.forEach((b) => {
+				// @ts-ignore
+				let idsInBin = b.map((d) => d.id);
+				const filteredArray = idsInBin.filter((value) =>
+					selectedIds.includes(value)
+				);
+				// @ts-ignore
+				b.isSelected = filteredArray.length > 0;
+			});
 			const colorScale = d3
 				.scaleSequentialSymlog(d3.interpolateBlues)
 				.domain([0, Math.max(...bins.map((b) => b.length))]);
 
 			const plotArea = svg.select(".plot-area");
+			const onBinClick = function (event: any, d: any) {
+				let selection = d.map((d: any) => d.id);
+				if (d.isSelected) {
+					//unselect this bin
+					d.isSelected = false;
+					selectionCallback(
+						selectedIds.filter((id) => !selection.includes(id))
+					);
+				} else {
+					if (event.ctrlKey) {
+						selection = [...selectedIds, ...selection];
+					}
+					selectionCallback(selection);
+				}
+			};
 			plotArea
 				.attr("stroke", "#000")
 				.attr("stroke-opacity", 0.5)
@@ -157,10 +194,20 @@ export default function Scatterplot(props: ScatterplotProps) {
 				.data(bins)
 				.join("path")
 				.attr("d", hexbin.hexagon())
+				.on("click", onBinClick)
 				.transition()
 				.duration(300)
 				.attr("transform", (d) => `translate(${d.x},${d.y})`)
-				.attr("fill", (d) => colorScale(d.length));
+				.attr("fill", (d) => colorScale(d.length))
+				.attr("opacity", (d: any) => {
+					return d.isSelected ? 1 : 1;
+				})
+				.attr("stroke", (d: any) => {
+					return d.isSelected ? "red" : "black";
+				})
+				.attr("stroke-width", (d: any) => {
+					return d.isSelected ? 2 : 1;
+				});
 
 			// append color legend
 			const legend = Legend(colorScale, {
@@ -211,7 +258,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 			// 	}) as any
 			// );
 		},
-		[plot]
+		[plot, selectedIds]
 	);
 	return (
 		<div>
