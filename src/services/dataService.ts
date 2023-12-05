@@ -42,12 +42,13 @@ export default class DataService {
 	fetchData(
 		filterColumn: string = "event_user_id",
 		filterValue: string = "15996738",
-		shownPlot: string = "revision_text_bytes"
+		shownPlot: string = "revision_text_bytes",
+		linearizeBy: string = "event_timestamp"
 	) {
 		const xLabel = ["diffNext", shownPlot].join("_");
 		const yLabel = ["diffPrev", shownPlot].join("_");
 		const reqAttributes = this.defaultFetchAttributes
-			.concat([xLabel, yLabel])
+			.concat([xLabel, yLabel, shownPlot, linearizeBy])
 			.join(",");
 		return fetch(
 			this.host +
@@ -59,13 +60,24 @@ export default class DataService {
 			});
 	}
 
-	plotsifyData(data: any, xField: string, yField: string, idField:string, attList: string[]) {
+	scatterplotifyData(data: any, xField: string, yField: string, idField:string, attList: string[]) {
 		let xIndex = attList.indexOf(xField);
 		let yIndex = attList.indexOf(yField);
 		let idIndex = attList.indexOf(idField);
 		let out = [];
 		for (let i = 0; i < data.length; i++) {
 			out.push({ x: data[i][xIndex], y: data[i][yIndex], id: data[i][idIndex] });
+		}
+		return out;
+	}
+
+	linechartifyData(data: any, xField: string, yField: string, idField:string, attList: string[]) {
+		let xIndex = attList.indexOf(xField);
+		let yIndex = attList.indexOf(yField);
+		let idIndex = attList.indexOf(idField);
+		let out = [];
+		for (let i = 0; i < data.length; i++) {
+			out.push({ date: data[i][xIndex], value: data[i][yIndex], id: data[i][idIndex] });
 		}
 		return out;
 	}
