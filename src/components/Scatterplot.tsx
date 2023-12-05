@@ -1,11 +1,11 @@
 import React from "react";
 import { useD3 } from "../hooks/useD3";
-import { Plot } from "../types/PlotsTypes";
+import { ScatterplotType } from "../types/PlotsTypes";
 import * as d3 from "d3";
 import * as d3Hexbin from "d3-hexbin";
 import Legend from "../d3/Legend";
 type ScatterplotProps = {
-	plot: Plot;
+	plot: ScatterplotType;
 	selectionCallback: any;
 	selectedIds: string[];
 };
