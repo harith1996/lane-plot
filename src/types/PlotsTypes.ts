@@ -8,18 +8,31 @@ export type PlotOptions = {
 	yDomain: [number,number] | undefined;
 };
 
-export type PlotDataPoint = {
+export type ScatterplotDataPoint = {
 	x: number;
 	y: number;
-	id: number;
+	id: string;
 };
 
-export type Plot = {
+export type LineChartDataPoint = {
+	date: string;
+	value: number;
+	id: string; 
+}
+
+export type ScatterplotType = {
 	labels: PlotLabels;
 	options: PlotOptions;
-	data: PlotDataPoint[];
+	data: ScatterplotDataPoint[];
+};
+
+export type LineChartType = {
+	labels: PlotLabels;
+	options: PlotOptions;
+	data: LineChartDataPoint[];
 };
 
 export type PlotsProps = {
-	plots: Plot[];
+	scatterplots: ScatterplotType[];
+	linecharts: LineChartType[];
 };
