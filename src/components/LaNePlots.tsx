@@ -11,28 +11,23 @@ export default function LaNePlots(props: PlotsProps) {
 	};
 	return (
 		<div className="lane-plots">
-			{props.scatterplots.map((plot, index) => {
-				return (
-					<div key={index}>
-						<Scatterplot
-							plot={plot}
-							selectionCallback={onSelectionChange}
-							selectedIds={selectedData}
-						></Scatterplot>
-					</div>
-				);
-			})}
-			{/* {props.linecharts.map((plot, index) => {
-				return (
-					<div key={index}>
-						<LineChart
-							plot={plot}
-							selectionCallback={onSelectionChange}
-							selectedIds={selectedData}
-						></LineChart>
-					</div>
-				);
-			})} */}
+				{props.activePlots.map((activePlot, index) => {
+					return (
+						<div className="plot-wrapper" key={index}>
+							<Scatterplot
+								plot={activePlot.scatterplot}
+								selectionCallback={onSelectionChange}
+								selectedIds={selectedData}
+							></Scatterplot>
+							
+							<LineChart
+								plot={activePlot.linechart}
+								selectionCallback={onSelectionChange}
+								selectedIds={selectedData}
+							></LineChart>
+						</div>
+					);
+				})}
 		</div>
 	);
 }

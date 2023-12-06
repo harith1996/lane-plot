@@ -33,6 +33,8 @@ export type LineChartType = {
 };
 
 export type PlotsProps = {
-	scatterplots: ScatterplotType[];
-	linecharts: LineChartType[];
+	activePlots: {
+		scatterplot: ScatterplotType;
+		linechart: LineChartType;
+	}[];
 };

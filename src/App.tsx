@@ -64,12 +64,7 @@ function getLineChart(
 }
 
 function App() {
-	const [activeScatterplots, setActiveScatterplots] = React.useState<
-		ScatterplotType[]
-	>([]);
-	const [activeLineCharts, setActiveLineCharts] = React.useState<
-		LineChartType[]
-	>([]);
+	const [activePlots, setActivePlots] = React.useState<any[]>([]);
 	const [filterMap, setFilterMap] = React.useState<LaNePlotFilters>({
 		linearizeBy: "event_timestamp",
 		eventType: "",
@@ -120,8 +115,13 @@ function App() {
 				return { scatterplots, linecharts };
 			});
 			plotPromises.then((plots) => {
-				setActiveScatterplots(plots.scatterplots);
-				setActiveLineCharts(plots.linecharts);
+				const active = plots.scatterplots.map((plot, index) => {
+					return {
+						scatterplot: plot,
+						linechart: plots.linecharts[index],
+					};
+				});
+				setActivePlots(active);
 			});
 		});
 
@@ -143,8 +143,7 @@ function App() {
 			</div>
 			<div>
 				<LaNePlots
-					scatterplots={activeScatterplots}
-					linecharts={activeLineCharts}
+					activePlots={activePlots}
 				></LaNePlots>
 			</div>
 		</div>
