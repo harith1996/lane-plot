@@ -155,6 +155,7 @@ export default function LineChart(props: LineChartProps) {
 				.data(data)
 				.join("circle") // enter append
 				.attr("class", "circle-points")
+				.transition()
 				.attr("r", (d) => {
 					return selectedPoints.some(
 						(item) => item.id === d.id
