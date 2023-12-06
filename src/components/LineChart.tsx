@@ -16,7 +16,7 @@ function parseDateTime(dateTime: string) {
 }
 
 export default function LineChart(props: LineChartProps) {
-	const columns = ["date", "value", "unique_id"];
+	const columns = ["date", "value", "id"];
 	const rawData = props.plot.data;
 	const rawSelectedPoints = props.selectedIds;
 	const selectionCallback = props.selectionCallback;
@@ -26,35 +26,35 @@ export default function LineChart(props: LineChartProps) {
 			//format the data
 			const timeIdx = columns.indexOf("date");
 			const valueIdx = columns.indexOf("value");
-			const uniqueIdIdx = columns.indexOf("unique_id");
+			const uniqueIdIdx = columns.indexOf("id");
 			const data = rawData.map((d) => {
 				//  28/03/2011 15:10
 				return {
 					date: parseDateTime(d.date)!,
 					value: d.value,
-					unique_id: d.id,
+					id: d.id,
 				};
 			});
-			const selectedPoints = rawSelectedPoints.map((unique_id) => {
+			const selectedPoints = rawSelectedPoints.map((id) => {
 				const dataItem = data.find(
-					(item: any) => item["unique_id"] === unique_id
+					(item: any) => item["id"] === id
 				)!;
 				return {
 					date: dataItem.date,
 					value: dataItem.value,
-					unique_id: dataItem.unique_id,
+					id: dataItem.id,
 				};
 			});
 
 			// set the dimensions and margins of the graph
 			const margin = { top: 10, right: 30, bottom: 30, left: 60 },
-				width = 960 - margin.left - margin.right,
-				height = 550 - margin.top - margin.bottom;
+				width = 700 - margin.left - margin.right,
+				height = 300 - margin.top - margin.bottom;
 
 			// clear the container
 
 			//append the svg object to the body of the page
-			svg.select(".plot-area")
+			svg
 				.attr("width", width + margin.left + margin.right)
 				.attr("height", height + margin.top + margin.bottom)
 				.attr("transform", `translate(${margin.left}, ${margin.top})`);
@@ -81,7 +81,7 @@ export default function LineChart(props: LineChartProps) {
 
 			// Add Y axis
 			const y = d3
-				.scaleLinear()
+				.scaleSymlog()
 				.domain([
 					0,
 					d3.max(data, function (d) {
@@ -132,13 +132,14 @@ export default function LineChart(props: LineChartProps) {
 				.attr("clip-path", "url(#clip)");
 
 			// Add the line
-			line.select("path")
+			line.selectAll("path")
 				.datum(data)
 				.join("path")
 				.attr("class", "line") // I add the class line to be able to modify this line later on.
 				.attr("fill", "none")
 				.attr("stroke", "steelblue")
 				.attr("stroke-width", 1.5)
+				.transition()
 				.attr("d", getLineGenerator() as any);
 
 			// Add the brushing
@@ -156,7 +157,7 @@ export default function LineChart(props: LineChartProps) {
 				.attr("class", "circle-points")
 				.attr("r", (d) => {
 					return selectedPoints.some(
-						(item) => item.unique_id === d.unique_id
+						(item) => item.id === d.id
 					)
 						? 4
 						: 1.4;
@@ -168,14 +169,14 @@ export default function LineChart(props: LineChartProps) {
 						return "blue";
 					}
 					return selectedPoints.some(
-						(item) => item.unique_id === d.unique_id
+						(item) => item.id === d.id
 					)
 						? "red"
 						: "black";
 				})
 				.attr("opacity", (d) => {
 					return selectedPoints.some(
-						(item) => item.unique_id === d.unique_id
+						(item) => item.id === d.id
 					)
 						? 0.6
 						: 0.2;
@@ -232,20 +233,16 @@ export default function LineChart(props: LineChartProps) {
 					.attr("cy", (d: any) => y(d.value)); // center y passing through your yScale
 			});
 		},
-		[plot]
+		[plot, rawSelectedPoints]
 	);
 	return (
 		<div>
 			<svg
 				ref={ref}
-				style={{
-					height: 1000,
-					width: "100%",
-					marginRight: "0px",
-					marginLeft: "0px",
-				}}
 			>
-				<g className="plot-area" />
+				<g className="plot-area">
+					<path className="line"></path>
+				</g>
 				<g className="x-axis" />
 				<text className="x-label" />
 				<text className="y-label" />
