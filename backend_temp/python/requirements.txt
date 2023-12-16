@@ -3,3 +3,6 @@ Flask
 matplotlib
 flask-cors
 virtualenv
+joblib
+modin
+tqdm
