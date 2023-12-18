@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 if __name__=="__main__":
     # article_name = "Earth"
-    article_names = ["Earth", "Murray_Art_Museum_Albury", "Lammers", "Peugeot_EX1_Concept", "Floyd_Bedbury"]
+    article_names = ["Barack_Obama", "Donald_Trump", "Mike_Pence", "Hilary_Clinton", "Tim_Kaine", "Joe_Biden", "Kamala_Harris"]
 
     for article_name in article_names:
         file_path = "wiki_raw/"+article_name+".pkl"

@@ -6,8 +6,8 @@ if __name__ == "__main__":
     # article_name = "Earth"
     # history_url = "https://api.wikimedia.org/core/v1/wikipedia/en/page/"+article_name+"/history"
 
-    article_ids = [47758247, 33782488, 28922023, 31574141]
-    article_names = ["Murray_Art_Museum_Albury", "Lammers", "Peugeot_EX1_Concept", "Floyd_Bedbury"]
+    #article_ids = [47758247, 33782488, 28922023, 31574141]
+    article_names = ["Barack_Obama", "Donald_Trump", "Mike_Pence", "Hilary_Clinton", "Tim_Kaine", "Joe_Biden", "Kamala_Harris"]
 
     for article_name in article_names:
         history_url = "https://api.wikimedia.org/core/v1/wikipedia/en/page/" + article_name + "/history"
