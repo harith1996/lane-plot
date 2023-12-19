@@ -35,3 +35,7 @@ __pycache__
 
 *wiki_json/
 
+backend_temp/word_type/books/
+backend_temp/word_type/plots/
+
+
