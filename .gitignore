@@ -33,9 +33,14 @@ __pycache__
 *.pkl
 *.csv
 
+# Exclude data files
+*.png
+*.txt
+
 *wiki_json/
 
 backend_temp/word_type/books/
 backend_temp/word_type/plots/
+backend_temp/word_type/state_of_union/
 
 

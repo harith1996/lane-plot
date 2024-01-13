@@ -62,18 +62,13 @@ class DataService:
                     out[filterName] = []
                 case "sliceBy":
                     out[filterName] = [
-                        "page_id",
-                        "event_user_id",
+                        "username"
                     ]
                 case "sliceByValue":
                     match filterMap["sliceBy"]:
-                        case "page_id":
+                        case "username":
                             out[filterName] = [
-                                "74804817",
-                                "1952670",
-                                "74199488",
-                                "70308452",
-                                "68401269",
+                                "Eob"
                             ]
                         case "event_user_id":
                             out[filterName] = [
@@ -86,7 +81,7 @@ class DataService:
                         case _:
                             out[filterName] = []
                 case "shownPlots":
-                    out[filterName] = ["revision_text_bytes", "event_timestamp"]
+                    out[filterName] = ["timestamp"]
                 case "eventType":
                     out[filterName] = []
                 case _:
