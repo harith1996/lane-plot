@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 
-MAX_LANE_DIST = 40
+MIN_LANE_DIST = -100
+MAX_LANE_DIST = 100
 
 def get_lane_distance(df1, df2, max_lane=MAX_LANE_DIST):
     dist_sum = 0.
@@ -38,8 +39,8 @@ def lane_plot(df, file="", title="", last="last", next="next", color="count", to
     plt.xlabel("last_word")
     plt.ylabel("next_word")
     plt.colorbar()
-    plt.ylim([0, MAX_LANE_DIST])
-    plt.xlim([0, MAX_LANE_DIST])
+    plt.ylim([MIN_LANE_DIST, MAX_LANE_DIST])
+    plt.xlim([MIN_LANE_DIST, MAX_LANE_DIST])
     if to_file:
         plt.savefig("plots/" + plot_title.replace(":", "colon").replace(";", "semicolon").replace(",", "comma").replace(".", "period") + ".png")
     else:

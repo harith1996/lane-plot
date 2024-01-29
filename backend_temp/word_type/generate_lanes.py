@@ -3,12 +3,16 @@ nltk.download('averaged_perceptron_tagger')
 import pandas as pd
 import os
 import string
+from rhymetagger import RhymeTagger
+import pronouncing
+import collections
+import re
 
 from lane_utils import get_lane_distance, lane_plot
 
-FILES = os.listdir("news/")
-FILES = ["cnn", "foxnews"]
-FILES = ["BUSINESS", "ENTERTAINMENT", "HEALTH", "NATION", "SCIENCE", "SPORTS", "TECHNOLOGY", "WORLD"]
+FILES = os.listdir("poetry/")
+# FILES = ["cnn", "foxnews"]
+# FILES = ["BUSINESS", "ENTERTAINMENT", "HEALTH", "NATION", "SCIENCE", "SPORTS", "TECHNOLOGY", "WORLD"]
 # FILES = ["Ashashi_Shimbun", "BuzzFeed", "CNN", "Fox-News", "Globe-Mail", "Mail-Guardian", "Peoples-Daily", "The-Guardian", "Times-India", "Wall-Street"]
 
 CONTENT_TAGS = ["FW"]
@@ -164,12 +168,70 @@ def get_lane_letters(text):
 
     return lanes
 
+def cleanse_word(word):
+    word = re.sub('[\d(),:.;?!“” ]', '', word)
+    word = re.sub('’', "'", word)
+    word = re.sub('œ', 'oe', word)
+    return word
+    # return word.lower().replace("(", "").replace(")", "").replace("’", "'").replace(",", "").replace(" ", "").replace(":", "").replace(".", "").replace(";", "").replace("?", "").replace("!", "").replace('“',"").replace("”", "")
+
+def lane_size(size_list):
+    last_list = []
+    next_list = []
+
+    last_list.append(float("-inf"))
+    last = size_list[0]
+
+    for element in size_list[1:]:
+        diff = element - last
+        next_list.append(-diff)
+        last_list.append(diff)
+
+        last = element
+
+    next_list.append(float("-inf"))
+
+    df = pd.DataFrame({'last': last_list, 'next': next_list})
+    df = df.groupby(["last", "next"]).size().reset_index(name='count')
+    return df
 
 if __name__ == "__main__":
     lane_dfs = []
     names = LETTERS + WORD_TAG_TYPES + STYLOMETYRIC_WORDS + PUNCTUATION_SIGNS
     #names = [s + "_letters" for s in LETTERS]
     for file in FILES:
+        with open("poetry/" + file, "r", encoding="utf8") as f:
+            lines = f.read().splitlines()
+
+        syllable_list = []
+        for line in lines:
+            syllables = 0
+            for word in line:
+                word = cleanse_word(word)
+                if word in ["", "'", "-", "—"]:
+                    continue
+
+                phones = pronouncing.phones_for_word(word)
+                if phones:
+                    syllables += sum([pronouncing.syllable_count(p) for p in phones[0]])
+                else:
+                    last_vowel = False
+                    for letter in word:
+                        if letter in ["a", "e", "i", "o", "u"]:
+                            if not last_vowel:
+                                syllables += 1
+                            last_vowel = True
+                        else:
+                            last_vowel = False
+
+            if syllables > 0:
+                syllable_list.append(syllables)
+
+        counts = collections.Counter(syllable_list)
+        df = lane_size(syllable_list)
+        lane_plot(df, title=file, to_file=False)
+
+        continue
 
         # with open("news/" + file, "r", encoding="utf8") as f:
         #     text = f.read()
@@ -212,5 +274,5 @@ if __name__ == "__main__":
 
         lane_dfs.append(file_dfs)
 
-    distances = get_function_distances(lane_dfs[0], lane_dfs[1], names)
+    # distances = get_function_distances(lane_dfs[0], lane_dfs[1], names)
     pass
