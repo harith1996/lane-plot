@@ -138,6 +138,9 @@ export default function Filters({
 					selectedValue={sliceByValue}
 					onChange={onSliceByValueChange}
 				></SingleSelect>
+				<div className="filter-details">
+					<></>
+				</div>
 			</div>
 			<div className="filter-group">
 				<MultiSelect

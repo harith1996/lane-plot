@@ -22,9 +22,8 @@ class DataService:
         df["Day"] = df[timeFieldName].dt.day
         df["Day of Week"] = df[timeFieldName].dt.dayofweek
         df["Hour"] = df[timeFieldName].dt.hour
-        df["Timestamp"] = (
-            df[timeFieldName] - pd.Timestamp("1970-01-01")
-        ) // pd.Timedelta("1s")
+        # df[timeFieldName] = df.apply(lambda x: x[timeFieldName].tz_convert("utc").tz_localize(None), axis=1)
+        df["Timestamp"] = pd.to_timedelta(df[timeFieldName] - pd.Timestamp("1970-01-01"), unit="S") // pd.Timedelta('1s')
 
     def get_eq_filtered_data(
         self,
@@ -56,24 +55,25 @@ class DataService:
             "shownPlots": [],
             "eventType": [],
         }
+        #get default values from diffby and linearizeBy in file name
         for filterName in filterMap:
             match filterName:
                 case "linearizeBy":
                     out[filterName] = []
                 case "sliceBy":
                     out[filterName] = [
-                        "page_id",
+                        "article_id",
                         "event_user_id",
                     ]
                 case "sliceByValue":
                     match filterMap["sliceBy"]:
-                        case "page_id":
+                        case "article_id":
                             out[filterName] = [
-                                "74804817",
-                                "1952670",
-                                "74199488",
-                                "70308452",
-                                "68401269",
+                                "49514870",
+                                "52547512",
+                                "37816935",
+                                "54266373",
+                                "45623450",
                             ]
                         case "event_user_id":
                             out[filterName] = [
@@ -86,7 +86,7 @@ class DataService:
                         case _:
                             out[filterName] = []
                 case "shownPlots":
-                    out[filterName] = ["revision_text_bytes", "event_timestamp"]
+                    out[filterName] = ["diff", "time_stamp"]
                 case "eventType":
                     out[filterName] = []
                 case _:
@@ -155,7 +155,7 @@ class DataService:
     # TODO: improve performance
     def add_values_by_id(self, fieldName, keyValuePairs):
         df = self.df
-        for keyValuePair in keyValuePairs:
+        for keyValuePair in tqdm(keyValuePairs, desc="Mapping diffs"):
             df.loc[
                 df[self.idFieldName] == int(keyValuePair[0]), fieldName
             ] = keyValuePair[1]

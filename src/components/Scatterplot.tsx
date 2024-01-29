@@ -136,6 +136,20 @@ export default function Scatterplot(props: ScatterplotProps) {
 					.text(plot.labels.yLabel);
 			};
 
+			const tooltip = (event: any, data : any) => {
+				const x = xScale(0) + 6;
+				const y = margin.top;
+				console.log(event);
+				console.log(data);
+				// return g
+				// 	.transition()
+				// 	.attr("class", "y-label")
+				// 	.attr("text-anchor", "start")
+				// 	.attr("x", x)
+				// 	.attr("y", y)
+				// 	.text(plot.labels.yLabel);
+			}
+
 			svg.select(".x-axis").call(xAxis);
 			svg.select(".y-axis").call(yAxis);
 			svg.select(".x-label").call(xLabel);
@@ -195,6 +209,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 				.join("path")
 				.attr("d", hexbin.hexagon())
 				.on("click", onBinClick)
+				.on("mouseover", tooltip)
 				.transition()
 				.duration(300)
 				.attr("transform", (d) => `translate(${d.x},${d.y})`)
@@ -277,6 +292,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 				<text className="y-label" />
 				<g className="y-axis" />
 				<g className="colorLegend" />
+				<g className="hex-tooltip" />
 			</svg>
 		</div>
 	);

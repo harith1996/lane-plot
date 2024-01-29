@@ -3,13 +3,13 @@ import pandas as pd
 
 def get_page_with_max_edits(df : pd.DataFrame):
     #filter out non-edit rows
-    df = df[df["event_entity"] == "revision"]
+    # df = df[df["event_entity"] == "revision"]
     
     #group by page_id and count number of edits
-    df = df.groupby("page_id").count()
+    df = df.groupby("article_id").count()
     
     #sort by number of edits
-    df = df.sort_values(by="event_type", ascending=False)
+    df = df.sort_values(by="rev_id", ascending=False)
     
     #return page_id with most edits
     return df.index[0]
