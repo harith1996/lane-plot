@@ -38,11 +38,11 @@ export default function LineChart(props: LineChartProps) {
 			const selectedPoints = rawSelectedPoints.map((id) => {
 				const dataItem = data.find(
 					(item: any) => item["id"] === id
-				)!;
+				);
 				return {
-					date: dataItem.date,
-					value: dataItem.value,
-					id: dataItem.id,
+					date: dataItem?.date,
+					value: dataItem?.value,
+					id: dataItem?.id,
 				};
 			});
 

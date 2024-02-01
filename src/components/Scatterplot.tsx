@@ -172,7 +172,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 				.domain([0, Math.max(...bins.map((b) => b.length))]);
 
 			const plotArea = svg.select(".plot-area");
-			const onBinClick = function (event: any, d: any) {
+			const onBinSelect = function (event: any, d: any) {
 				let selection = d.map((d: any) => d.id);
 				if (d.isSelected) {
 					//unselect this bin
@@ -194,7 +194,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 				.data(bins)
 				.join("path")
 				.attr("d", hexbin.hexagon())
-				.on("click", onBinClick)
+				.on("mouseover", onBinSelect)
 				.transition()
 				.duration(300)
 				.attr("transform", (d) => `translate(${d.x},${d.y})`)
