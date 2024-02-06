@@ -1,6 +1,6 @@
 import nltk
 import pandas as pd
-from generate_lanes import lane_plot
+from generate_lanes import lane_chart
 import os
 
 FILES = ["2020_trump.txt", "2021_biden.txt"]
@@ -20,6 +20,6 @@ if __name__ == '__main__':
         for keyword in KEYWORDS:
             df = token_word_distance(text, keyword)
             df_word = df.groupby(["last_word", "next_word"]).size().reset_index(name='count')
-            #lane_plot(df_word, file=file, title=keyword, last="last_word", next="next_word", to_file=True)
+            #lane_chart(df_word, file=file, title=keyword, last="last_word", next="next_word", to_file=True)
 
 

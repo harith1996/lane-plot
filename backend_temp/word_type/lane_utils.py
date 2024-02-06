@@ -1,7 +1,7 @@
 from matplotlib import pyplot as plt
 import math
 
-MIN_LANE_DIST = -20
+MIN_LANE_DIST = 0
 MAX_LANE_DIST = 20
 
 def get_lane_distance(df1, df2, max_lane=MAX_LANE_DIST):
@@ -31,19 +31,53 @@ def get_lane_distance(df1, df2, max_lane=MAX_LANE_DIST):
 
     return dist_sum, df1_sum+df2_sum
 
-def lane_plot(df, file="", title="", last="last", next="next", color="mean_size", to_file=False, size="count"):
+def line_chart(series, file=" ", title="", to_file=False):
+    # y = [0.]
+    # x = [0.]
+    #
+    # for i, element in enumerate(series):
+    #     x.append(element.timestamp())
+    #     y.append(i+1)
+    #
+    # plt.plot(x, y)
+    plt.plot(series)
+
+    plot_title = file+" line chart "+title
+    plt.title(plot_title)
+
+    # plt.xlim(0, x[-1])
+
+    if to_file:
+        fig_name = "plots/" + plot_title.replace(":", "colon").replace(";", "semicolon").replace(",", "comma").replace(".", "period") + ".png"
+        plt.savefig(fig_name)
+    else:
+        plt.show()
+    plt.clf()
+
+def lane_chart(df, file="", title="", last="last", next="next", color="mean_size", to_file=False, size=None, min_lane=MIN_LANE_DIST, max_lane=MAX_LANE_DIST, scale=None):
     # group_df = df.groupby(["last_f", "next_f"]).size().reset_index(name='count')
-    plt.scatter(df[last], df[next], c=df[color], cmap="viridis", s=(10*df[size].apply(math.log)))
+    if size:
+        size = 25*df[size].apply(math.log)
+        # size = df[size]/10
+    else:
+        size = 1
+    plt.scatter(df[last], df[next], c=df[color], cmap="viridis", s=size)
 
     plot_title = file+" LaNe chart "+title
     plt.title(plot_title)
     plt.xlabel("last")
     plt.ylabel("next")
     plt.colorbar()
-    plt.ylim([MIN_LANE_DIST, MAX_LANE_DIST])
-    plt.xlim([MIN_LANE_DIST, MAX_LANE_DIST])
+    # plt.ylim([min_lane, max_lane])
+    # plt.xlim([min_lane, max_lane])
+
+    if scale == "log":
+        plt.yscale('log')
+        plt.xscale('log')
+
     if to_file:
-        plt.savefig("plots/" + plot_title.replace(":", "colon").replace(";", "semicolon").replace(",", "comma").replace(".", "period") + ".png")
+        fig_name = "plots/" + plot_title.replace(":", "colon").replace(";", "semicolon").replace(",", "comma").replace(".", "period") + ".png"
+        plt.savefig(fig_name)
     else:
         plt.show()
     plt.clf()

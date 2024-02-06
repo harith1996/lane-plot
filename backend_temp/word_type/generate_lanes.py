@@ -8,7 +8,7 @@ import pronouncing
 import collections
 import re
 
-from lane_utils import get_lane_distance, lane_plot
+from lane_utils import get_lane_distance, lane_chart
 
 FILES = os.listdir("poetry/")
 #FILES = ["whitman_LeavesOfGrass.txt"]
@@ -269,8 +269,16 @@ if __name__ == "__main__":
 
         counts = collections.Counter(syllable_list)
 
+        # syllable_list = []
+        # value = 0
+        # for i in range(100000):
+        #     rand = random.randint(0, 40)
+        #     value += rand
+        #     syllable_list.append(value)
+        # syllable_list = [random.randint(0, 40) for _ in range(10000)]
+
         df = lane_size(syllable_list, df_filename="dfs/"+file+".csv")#, element_content=kept_lines)
-        lane_plot(df, title=file, to_file=False)
+        lane_chart(df, title=file, to_file=False, size="count")
 
         continue
 
@@ -311,7 +319,7 @@ if __name__ == "__main__":
             file_dfs.append(token_word_distance(tokens, word))
 
         for i, lane_df in enumerate(file_dfs):
-            lane_plot(lane_df, file+"_"+names[i], file+"_"+names[i], to_file=True)
+            lane_chart(lane_df, file+"_"+names[i], file+"_"+names[i], to_file=True)
 
         lane_dfs.append(file_dfs)
 
