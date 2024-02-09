@@ -25,11 +25,24 @@ class DataService:
         # df[timeFieldName] = df.apply(lambda x: x[timeFieldName].tz_convert("utc").tz_localize(None), axis=1)
         df["Timestamp"] = pd.to_timedelta(df[timeFieldName] - pd.Timestamp("1970-01-01"), unit="S") // pd.Timedelta('1s')
 
+    def add_time_till_event(
+        self,
+        event_time_str: str,
+        as_name: str = "time_till",
+        time_column_name: str = "event_timestamp",
+    ):
+        df = self.df
+        df[as_name] = (
+            df[time_column_name] - pd.Timestamp(event_time_str)
+        ) // pd.Timedelta("1s")
+        # return dataframe
+        return df
+
     def get_eq_filtered_data(
         self,
         columns,
         filter_col,
-        filter_val,
+        filter_val
     ):
         df = self.df
         out_attributes = columns + [self.idFieldName]
@@ -86,7 +99,7 @@ class DataService:
                         case _:
                             out[filterName] = []
                 case "shownPlots":
-                    out[filterName] = ["diff", "time_stamp"]
+                    out[filterName] = ["diff", "size", "time_stamp"]
                 case "eventType":
                     out[filterName] = []
                 case _:
@@ -160,3 +173,4 @@ class DataService:
                 df[self.idFieldName] == int(keyValuePair[0]), fieldName
             ] = keyValuePair[1]
         return df
+0
