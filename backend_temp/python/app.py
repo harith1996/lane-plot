@@ -9,7 +9,7 @@ from data_processing.wiki_history_helper import (
 )
 from tqdm import tqdm
 
-filename = "./backend_temp/raw_data/diffBy=diff_groupBy=article_id.csv"
+filename = "./backend_temp/raw_data/diffBy=time_stamp_groupBy=article_id.csv"
 
 # check file extension
 sep = ","
@@ -50,7 +50,8 @@ CORS(app)
 
 ds = DataService(df, {"time_stamp": "dateTime"})
 ds.split_time("time_stamp")
-
+ds.add_time_till_event("2016-11-08", "time_till_election", "time_stamp")
+ds.df.to_csv("diffBy=diff_groupBy=article_id.csv", sep=",")
 
 @app.route("/")
 def hello_world():
@@ -85,6 +86,7 @@ def get_data():
     # extract arguments from request
     filter_col = request.args.get("filterColumn")
     filter_val = request.args.get("filterValue")
+
     attributes = request.args.get("attributes").split(",")
     return ds.get_eq_filtered_data(attributes, filter_col, filter_val)
 
