@@ -136,7 +136,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 					.text(plot.labels.yLabel);
 			};
 
-			const tooltip = (event: any, data : any) => {
+			const tooltip = (event: any, data: any) => {
 				const x = xScale(0) + 6;
 				const y = margin.top;
 				console.log(event);
@@ -148,84 +148,107 @@ export default function Scatterplot(props: ScatterplotProps) {
 				// 	.attr("x", x)
 				// 	.attr("y", y)
 				// 	.text(plot.labels.yLabel);
-			}
+			};
 
 			svg.select(".x-axis").call(xAxis);
 			svg.select(".y-axis").call(yAxis);
 			svg.select(".x-label").call(xLabel);
 			svg.select(".y-label").call(yLabel);
 
-			// Append the dots or bins.
-			const radius = 5;
-			const hexbin = d3Hexbin
-				.hexbin()
-				// @ts-ignore
-				.x((d) => xScale(d.x))
-				// @ts-ignore
-				.y((d) => yScale(d.y))
-				.radius((radius * width) / (height - 1))
-				.extent([
-					[margin.left, margin.top],
-					[width - margin.right, height - margin.bottom],
-				]);
-
-			// @ts-ignore
-			let bins = hexbin(data);
-
-			bins.forEach((b) => {
-				// @ts-ignore
-				let idsInBin = b.map((d) => d.id);
-				const filteredArray = idsInBin.filter((value) =>
-					selectedIds.includes(value)
-				);
-				// @ts-ignore
-				b.isSelected = filteredArray.length > 0;
-			});
-			const colorScale = d3
-				.scaleSequentialSymlog(d3.interpolateBlues)
-				.domain([0, Math.max(...bins.map((b) => b.length))]);
-
 			const plotArea = svg.select(".plot-area");
-			const onBinSelect = function (event: any, d: any) {
-				let selection = d.map((d: any) => d.id);
-				if (d.isSelected) {
-					//unselect this bin
-					d.isSelected = false;
-					selectionCallback(
-						selectedIds.filter((id) => !selection.includes(id))
-					);
-				} else {
-					if (event.ctrlKey) {
-						selection = [...selectedIds, ...selection];
-					}
-					selectionCallback(selection);
-				}
-			};
-			plotArea
-				.attr("stroke", "#000")
-				.attr("stroke-opacity", 0.5)
-				.selectAll("path")
-				.data(bins)
-				.join("path")
-				.attr("d", hexbin.hexagon())
-				.on("mouseover", onBinSelect)
+
+			// // Append the dots or bins.
+			// const radius = 5;
+			// const hexbin = d3Hexbin
+			// 	.hexbin()
+			// 	// @ts-ignore
+			// 	.x((d) => xScale(d.x))
+			// 	// @ts-ignore
+			// 	.y((d) => yScale(d.y))
+			// 	.radius((radius * width) / (height - 1))
+			// 	.extent([
+			// 		[margin.left, margin.top],
+			// 		[width - margin.right, height - margin.bottom],
+			// 	]);
+
+			// // @ts-ignore
+			// let bins = hexbin(data);
+
+			// bins.forEach((b) => {
+			// 	// @ts-ignore
+			// 	let idsInBin = b.map((d) => d.id);
+			// 	const filteredArray = idsInBin.filter((value) =>
+			// 		selectedIds.includes(value)
+			// 	);
+			// 	// @ts-ignore
+			// 	b.isSelected = filteredArray.length > 0;
+			// });
+			// const colorScale = d3
+			// 	.scaleSequentialSymlog(d3.interpolateBlues)
+			// 	.domain([0, Math.max(...bins.map((b) => b.length))]);
+
+			// const onBinSelect = function (event: any, d: any) {
+			// 	let selection = d.map((d: any) => d.id);
+			// 	if (d.isSelected) {
+			// 		//unselect this bin
+			// 		d.isSelected = false;
+			// 		selectionCallback(
+			// 			selectedIds.filter((id) => !selection.includes(id))
+			// 		);
+			// 	} else {
+			// 		if (event.ctrlKey) {
+			// 			selection = [...selectedIds, ...selection];
+			// 		}
+			// 		selectionCallback(selection);
+			// 	}
+			// };
+			// plotArea
+			// 	.attr("stroke", "#000")
+			// 	.attr("stroke-opacity", 0.5)
+			// 	.selectAll("path")
+			// 	.data(bins)
+			// 	.join("path")
+			// 	.attr("d", hexbin.hexagon())
+			// 	.on("mouseover", onBinSelect)
+			// 	.transition()
+			// 	.duration(300)
+			// 	.attr("transform", (d) => `translate(${d.x},${d.y})`)
+			// 	.attr("fill", (d) => colorScale(d.length))
+			// 	.attr("opacity", (d: any) => {
+			// 		return d.isSelected ? 1 : 1;
+			// 	})
+			// 	.attr("stroke", (d: any) => {
+			// 		return d.isSelected ? "red" : "black";
+			// 	})
+			// 	.attr("stroke-width", (d: any) => {
+			// 		return d.isSelected ? 2 : 1;
+			// 	});
+
+			const minColorDomain = d3.min(data, (d: any) => d.colorField);
+			const maxColorDomain = d3.max(data, (d: any) => d.colorField);
+			const colorScale = d3
+				.scaleDiverging(d3.interpolateRdYlBu)
+				.domain([-120000000, 0, maxColorDomain]);
+
+			const dot = plotArea
+				.attr("stroke", "steelblue")
+				.attr("stroke-width", 0)
+				.selectAll("circle")
+				.data(data)
+				.join("circle")
 				.transition()
 				.duration(300)
-				.attr("transform", (d) => `translate(${d.x},${d.y})`)
-				.attr("fill", (d) => colorScale(d.length))
-				.attr("opacity", (d: any) => {
-					return d.isSelected ? 1 : 1;
-				})
-				.attr("stroke", (d: any) => {
-					return d.isSelected ? "red" : "black";
-				})
-				.attr("stroke-width", (d: any) => {
-					return d.isSelected ? 2 : 1;
-				});
+				.attr(
+					"transform",
+					(d) => `translate(${xScale(d.x)},${yScale(d.y)})`
+				)
+				.attr("r", 3)
+				.attr("opacity", 0.6)
+				.attr("fill", (d) => colorScale((d as any).colorField));
 
 			// append color legend
 			const legend = Legend(colorScale, {
-				title: "Number of points",
+				title: "Time till election",
 			});
 			svg.select(".colorLegend")
 				.html(legend?.innerHTML as string)
@@ -233,19 +256,6 @@ export default function Scatterplot(props: ScatterplotProps) {
 					"transform",
 					`translate(${margin.left},${height - margin.bottom + 30})`
 				);
-
-			/*************** SCATTERPLOT
-			const dot = plotArea
-					.attr("stroke", "steelblue")
-					.attr("stroke-width", 0)
-				.selectAll("circle")
-				.data(data)
-				.join("circle")
-					.attr("transform", (d) => `translate(${xScale(d.x)},${yScale(d.y)})`)
-					.attr("r", 7)
-					.attr("opacity", 0.3);
-			****************/
-
 			// svg.call(
 			// 	d3.brush().on("start brush end", ({ selection }) => {
 			// 		let value: any[] = [];
