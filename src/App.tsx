@@ -14,11 +14,13 @@ function getScatterplot(shownPlot: string, data: any, attList: any) {
 	const xLabel = ["diffNext", shownPlot].join("_");
 	const yLabel = ["diffPrev", shownPlot].join("_");
 	const idField = "unique_id";
+	const colorField = "time_till_election";
 	const plotData = ds.scatterplotifyData(
 		data,
 		xLabel,
 		yLabel,
 		idField,
+		colorField,
 		attList
 	);
 	return {
@@ -89,7 +91,9 @@ function App() {
 				return ds.fetchData(
 					filterMap.sliceBy,
 					filterMap.sliceByValue,
-					shownPlot
+					shownPlot,
+					"time_stamp",
+					["time_till_election", "article_title"]
 				);
 			});
 			const plotPromises = Promise.all(dataPromises).then((datasets) => {
