@@ -21,7 +21,7 @@ if filename.split(".")[-1] == "tsv":
     ).readlines()
     columns = list(line.split("\n")[0] for line in columns)
 
-p = 1  # fraction of the data/
+p = 0.4  # fraction of the data/
 # if random from [0,1] interval is greater than p the row will be skipped
 random.seed(4)
 

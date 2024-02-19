@@ -68,53 +68,61 @@ export default function Scatterplot(props: ScatterplotProps) {
 
 			const yScale = d3
 				.scaleSymlog()
-				.domain(yDomain)
+				.domain(yDomain.reverse())
 				.rangeRound([margin.top, height - margin.bottom])
 				.clamp(true);
 
-			const xTicks: [number, number] = d3.extent(xScale.domain()) as [
-				number,
-				number
-			];
-
-			const yTicks: [number, number] = d3.extent(yScale.domain()) as [
-				number,
-				number
-			];
-
-			const xAxis = (g: any) =>
-				g
+			const xAxis = (
+				g: any,
+				scale: d3.ScaleSymLog<number, number, number>,
+				oppScale: d3.ScaleSymLog<number, number, number>
+			) => {
+				const xTicks: [number, number] = d3.extent(scale.domain()) as [
+					number,
+					number
+				];
+				return g
 					.transition()
-					.attr("transform", `translate(0,${yScale(0)})`)
+					.attr("transform", `translate(0,${oppScale(0)})`)
 					.call(
 						d3
-							.axisBottom(xScale)
+							.axisBottom(scale)
 							.tickValues(
 								d3
 									.ticks(...xTicks, width / 80)
-									.filter((v) => xScale(v) !== undefined)
+									.filter((v) => scale(v) !== undefined)
 							)
 							.tickSizeOuter(0)
 					);
+			};
 
-			const yAxis = (g: any) =>
-				g
-					.transition()
-					.attr("transform", `translate(${xScale(0)},0)`)
+			const yAxis = (
+				g: any,
+				scale: d3.ScaleSymLog<number, number, number>,
+				oppScale: d3.ScaleSymLog<number, number, number>
+			) => {
+				const yTicks: [number, number] = d3.extent(scale.domain()) as [
+					number,
+					number
+				];
+				g.transition()
+					.attr("transform", `translate(${oppScale(0)},0)`)
 					.call(
 						d3
-							.axisLeft(yScale)
+							.axisLeft(scale)
 							.tickValues(
 								d3
 									.ticks(...yTicks, height / 80)
-									.filter((v) => xScale(v) !== undefined)
+									.filter((v) => scale(v) !== undefined)
 							)
 							.tickSizeOuter(0)
 					);
+			};
 
-			const xLabel = (g: any) => {
+			const xLabel = (g: any, 
+				scale: d3.ScaleSymLog<number, number, number>) => {
 				const x = width - margin.right;
-				const y = yScale(0) - 6;
+				const y = scale(0) - 6;
 				return g
 					.transition()
 					.attr("class", "x-label")
@@ -124,8 +132,9 @@ export default function Scatterplot(props: ScatterplotProps) {
 					.text(plot.labels.xLabel);
 			};
 
-			const yLabel = (g: any) => {
-				const x = xScale(0) + 6;
+			const yLabel = (g: any, 
+				scale: d3.ScaleSymLog<number, number, number>) => {
+				const x = scale(0) + 6;
 				const y = margin.top;
 				return g
 					.transition()
@@ -150,10 +159,10 @@ export default function Scatterplot(props: ScatterplotProps) {
 				// 	.text(plot.labels.yLabel);
 			};
 
-			svg.select(".x-axis").call(xAxis);
-			svg.select(".y-axis").call(yAxis);
-			svg.select(".x-label").call(xLabel);
-			svg.select(".y-label").call(yLabel);
+			svg.select(".x-axis").call(xAxis, xScale, yScale);
+			svg.select(".y-axis").call(yAxis, yScale, xScale);
+			svg.select(".x-label").call(xLabel, yScale);
+			svg.select(".y-label").call(yLabel, xScale);
 
 			const plotArea = svg.select(".plot-area");
 
@@ -231,20 +240,50 @@ export default function Scatterplot(props: ScatterplotProps) {
 				.domain([-120000000, 0, maxColorDomain]);
 
 			const dot = plotArea
-				.attr("stroke", "steelblue")
-				.attr("stroke-width", 0)
 				.selectAll("circle")
 				.data(data)
 				.join("circle")
 				.transition()
 				.duration(300)
-				.attr(
-					"transform",
-					(d) => `translate(${xScale(d.x)},${yScale(d.y)})`
-				)
+				// .attr(
+				// 	"transform",
+				// 	(d) => `translate(${xScale(d.x)},${yScale(d.y)})`
+				// )
+				.attr("cx", (d) => xScale(d.x))
+				.attr("cy", (d) => yScale(d.y))
 				.attr("r", 3)
-				.attr("opacity", 0.6)
+				.attr("opacity", 0.9)
 				.attr("fill", (d) => colorScale((d as any).colorField));
+
+			const scaleXCopy = xScale.copy();
+			const scaleYCopy = yScale.copy();
+			// generator function for zoom
+			const zoom = d3.zoom().on("zoom", (event) => {
+				// applying the zoom transformation to the vertical and horizontal
+				// scales
+				const rescaledX = event.transform.rescaleX(scaleXCopy);
+				const rescaledY = event.transform.rescaleY(scaleYCopy);
+
+				// updating the point mark
+				plotArea
+					.selectAll("circle")
+					.transition()
+					
+					.attr("cx", (d : any) => rescaledX(d.x))
+					.attr("cy", (d : any) => rescaledY(d.y))
+
+				// reconfiguring the axis generators
+
+				// redrawing the axes
+
+				svg.select(".x-axis").call(xAxis, rescaledX, rescaledY);
+				svg.select(".y-axis").call(yAxis, rescaledY, rescaledX);
+				svg.select(".x-label").call(xLabel, rescaledY);
+				svg.select(".y-label").call(yLabel, rescaledX);
+			})
+			.scaleExtent([1, 30]) // setting the zooming limits;
+
+			svg.call(zoom as any);
 
 			// append color legend
 			const legend = Legend(colorScale, {
