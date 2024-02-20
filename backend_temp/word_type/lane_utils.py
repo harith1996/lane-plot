@@ -1,4 +1,5 @@
 from matplotlib import pyplot as plt
+import numpy as np
 import math
 
 MIN_LANE_DIST = 0
@@ -54,26 +55,59 @@ def line_chart(series, file=" ", title="", to_file=False):
         plt.show()
     plt.clf()
 
-def lane_chart(df, file="", title="", last="last", next="next", color="mean_size", to_file=False, size=None, min_lane=MIN_LANE_DIST, max_lane=MAX_LANE_DIST, scale=None):
+def lane_chart(df, file="", title="", last="last", next="next", color=None, to_file=False, size=None, min_lane=MIN_LANE_DIST, max_lane=MAX_LANE_DIST, scale=None):
     # group_df = df.groupby(["last_f", "next_f"]).size().reset_index(name='count')
     if size:
         size = 25*df[size].apply(math.log)
         # size = df[size]/10
     else:
         size = 1
-    plt.scatter(df[last], df[next], c=df[color], cmap="viridis", s=size)
+
+    if color:
+        plt.scatter(df[last], df[next], c=df[color], cmap="viridis", s=size)
+    else:
+        plt.scatter(df[last], df[next], s=size)
 
     plot_title = file+" LaNe chart "+title
     plt.title(plot_title)
     plt.xlabel("last")
     plt.ylabel("next")
     plt.colorbar()
-    # plt.ylim([min_lane, max_lane])
-    # plt.xlim([min_lane, max_lane])
+
+    plt.ylim([0, max_lane])
+    plt.xlim([0, max_lane])
 
     if scale == "log":
         plt.yscale('log')
         plt.xscale('log')
+
+    if to_file:
+        fig_name = "plots/" + plot_title.replace(":", "colon").replace(";", "semicolon").replace(",", "comma").replace(".", "period") + ".png"
+        plt.savefig(fig_name)
+    else:
+        plt.show()
+    plt.clf()
+
+def lane_hist(df, file="", title="", to_file=False, last="last", next="next", nbins=50, scale=None):
+    x = df["last"]
+    y = df["next"]
+
+    if scale == "log":
+        x_bins = [0]+np.logspace(0, np.log10(x.max()), nbins-1)
+        y_bins = [0]+np.logspace(0, np.log10(y.max()), nbins-1)
+        plt.xscale('log')
+        plt.yscale('log')
+    else:
+        x_bins = [i*x.max()/nbins for i in range(nbins)]
+        y_bins = [i*y.max()/nbins for i in range(nbins)]
+
+    plt.hist2d(x, y, [x_bins, y_bins], cmin=1, cmap="viridis")
+
+    plot_title = file+" LaNe chart "+title
+    plt.title(plot_title)
+    plt.xlabel("last")
+    plt.ylabel("next")
+    plt.colorbar()
 
     if to_file:
         fig_name = "plots/" + plot_title.replace(":", "colon").replace(";", "semicolon").replace(",", "comma").replace(".", "period") + ".png"
