@@ -125,7 +125,7 @@ class DataService:
             fieldType = self.df.dtypes[fieldName].name
 
         # initialize diffComputer
-        diffC = DiffComputer(fieldType, relative=True)
+        diffC = DiffComputer(fieldType, relative=False)
 
         # compute diffs
         diffList = []
