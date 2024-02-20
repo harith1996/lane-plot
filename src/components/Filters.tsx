@@ -146,7 +146,6 @@ export default function Filters({
 					onChange={onSliceByValueChange}
 					helperText={sliceByValueHelperText}
 				></SingleSelect>
-				<span>slice by value helper text</span>
 				<div className="filter-details">
 					<></>
 				</div>
