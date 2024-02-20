@@ -10,7 +10,7 @@ from data_processing.wiki_history_helper import (
 )
 from tqdm import tqdm
 
-filename = "./backend_temp/raw_data/diffBy=diff_groupBy=article_id.csv"
+filename = "./backend_temp/raw_data/diffBy=size_groupBy=article_id.csv"
 
 # check file extension
 sep = ","
@@ -22,7 +22,7 @@ if filename.split(".")[-1] == "tsv":
     ).readlines()
     columns = list(line.split("\n")[0] for line in columns)
 
-p = 0.4  # fraction of the data/
+p = 1  # fraction of the data/
 # if random from [0,1] interval is greater than p the row will be skipped
 random.seed(4)
 
@@ -101,7 +101,8 @@ def get_filter_values():
 def get_diff_list():
     fieldName = request.args.get("fieldName")
     linearOrderBy = request.args.get("linearOrderBy")
-    out = ds.get_diff_list(fieldName, linearOrderBy)
+    relative = request.args.get("relative")
+    out = ds.get_diff_list(fieldName, linearOrderBy, relative)
     return out
 
 
@@ -110,15 +111,17 @@ def add_diff_list():
     fieldName = request.args.get("fieldName").split(",")[0]
     linearOrderBy = request.args.get("linearOrderBy")
     groupBy = request.args.get("groupBy")
+    relative = request.args.get("relative", type=bool, default=False)
     diffList = []
     distinctValues = list(df[groupBy].unique())
     for val in tqdm(distinctValues, desc="Computing diffs"):
         filteredDf = ds.get_filtered_df(groupBy, val, ds.df)
-        diffList += ds.get_diff_list(fieldName, linearOrderBy, filteredDf)
-    prevFieldName = "_".join(["diffPrev", fieldName])
-    prevValues = list(map(lambda x: [x["unique_id"], x["diffPrev"]], diffList))
-    nextFieldName = "_".join(["diffNext", fieldName])
-    nextValues = list(map(lambda x: [x["unique_id"], x["diffNext"]], diffList))
+        diffList += ds.get_diff_list(fieldName, linearOrderBy, relative, filteredDf)
+    [nextCol,prevCol] = ds.get_diff_col_names(relative)
+    prevFieldName = "_".join([prevCol, fieldName])
+    prevValues = list(map(lambda x: [x["unique_id"], x[prevCol]], diffList))
+    nextFieldName = "_".join([nextCol, fieldName])
+    nextValues = list(map(lambda x: [x["unique_id"], x[nextCol]], diffList))
     ds.add_values_by_id(prevFieldName, prevValues)
     ds.add_values_by_id(nextFieldName, nextValues)
     print(ds.df)

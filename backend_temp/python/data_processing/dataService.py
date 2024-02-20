@@ -106,8 +106,15 @@ class DataService:
                     out[filterName] = []
         return out
 
+    def get_diff_col_names(self, relative=False):
+        
+        [nextCol, prevCol] = ["diffNext", "diffPrev"]
+        if(relative):
+            [nextCol, prevCol] = ["relDiffNext", "relDiffPrev"]
+        return [nextCol, prevCol]
+    
     # TODO: add values directly to dataframe
-    def get_diff_list(self, fieldName, linearOrderBy, df=None):
+    def get_diff_list(self, fieldName, linearOrderBy, relative=False, df=None):
         # sort dataframe by df
         sortedDf = self.get_sorted_df(linearOrderBy, df)
         # get list of values for column fieldName
@@ -125,8 +132,9 @@ class DataService:
             fieldType = self.df.dtypes[fieldName].name
 
         # initialize diffComputer
-        diffC = DiffComputer(fieldType, relative=False)
+        diffC = DiffComputer(fieldType, relative=relative)
 
+        [nextCol, prevCol] = self.get_diff_col_names(relative)
         # compute diffs
         diffList = []
         if len(values) == 1:
@@ -135,14 +143,14 @@ class DataService:
             for i in range(len(values)):
                 item = {}
                 if i == 0:
-                    item["diffPrev"] = None
-                    item["diffNext"] = diffC.compute_diff(values[i + 1], values[i])
+                    item[prevCol] = None
+                    item[nextCol] = diffC.compute_diff(values[i + 1], values[i])
                 elif i == len(values) - 1:
-                    item["diffPrev"] = diffC.compute_diff(values[i - 1], values[i])
-                    item["diffNext"] = None
+                    item[prevCol] = diffC.compute_diff(values[i - 1], values[i])
+                    item[nextCol] = None
                 else:
-                    item["diffPrev"] = diffC.compute_diff(values[i - 1], values[i])
-                    item["diffNext"] = diffC.compute_diff(values[i + 1], values[i])
+                    item[prevCol] = diffC.compute_diff(values[i - 1], values[i])
+                    item[nextCol] = diffC.compute_diff(values[i + 1], values[i])
 
                 item[self.idFieldName] = int(keyValuePairs[i][0])
                 diffList.append(item)

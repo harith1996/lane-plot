@@ -93,7 +93,7 @@ function App() {
 					filterMap.sliceByValue,
 					shownPlot,
 					"time_stamp",
-					["time_till_election", "article_title", "comment", "rev_id", "is_reverted"]
+					["article_title", "comment", "rev_id", "is_reverted"]
 				);
 			});
 			const plotPromises = Promise.all(dataPromises).then((datasets) => {
