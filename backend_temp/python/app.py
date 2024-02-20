@@ -124,6 +124,16 @@ def add_diff_list():
     ds.df.to_csv("diffBy=" + fieldName + "_groupBy=" + groupBy + ".csv", sep=",")
     return jsonify(diffList)
 
+@app.route(f"/get-human-readable-name")
+def get_human_readable_name():
+    fieldName = request.args.get("fieldName")
+    fieldValue = request.args.get("fieldValue")
+    res  = {
+        "fieldName": fieldName,
+        "fieldValue": fieldValue,
+        "humanReadableName": ds.get_human_readable_name(fieldName, fieldValue)
+    }
+    return jsonify(res)
 
 if __name__ == "__main__":
     app.run(debug=False)

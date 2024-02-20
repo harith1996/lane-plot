@@ -173,4 +173,10 @@ class DataService:
                 df[self.idFieldName] == int(keyValuePair[0]), fieldName
             ] = keyValuePair[1]
         return df
-0
+    
+    def get_human_readable_name(self, fieldName, fieldValue):
+        df = self.df
+        if(fieldName == "article_id"):
+            #fetch the article from data
+            article = df.loc[df["article_id"] == int(fieldValue)]
+            return article["article_title"].iloc[0]

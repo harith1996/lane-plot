@@ -93,15 +93,15 @@ function App() {
 					filterMap.sliceByValue,
 					shownPlot,
 					"time_stamp",
-					["time_till_election", "article_title"]
+					["time_till_election", "article_title", "comment", "rev_id"]
 				);
 			});
 			const plotPromises = Promise.all(dataPromises).then((datasets) => {
 				const scatterplots = datasets.map((dataset) => {
 					const reqAttributes = dataset.reqAttributes;
+					const attList = reqAttributes.split(",");
 					const data = dataset.data;
 					const shownPlot = dataset.shownPlot;
-					const attList = reqAttributes.split(",");
 					return getScatterplot(shownPlot, data, attList);
 				});
 				const linecharts = datasets.map((dataset) => {
@@ -143,12 +143,11 @@ function App() {
 					filterValues={filterMap}
 					filterOptions={filterOptions}
 					onFilterChange={onFilterChange}
+					getHelperText={ds.fetchHumanReadableEntityName.bind(ds)}
 				></Filters>
 			</div>
 			<div>
-				<LaNePlots
-					activePlots={activePlots}
-				></LaNePlots>
+				<LaNePlots activePlots={activePlots}></LaNePlots>
 			</div>
 		</div>
 	);

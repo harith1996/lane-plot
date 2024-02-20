@@ -2,12 +2,14 @@ import * as React from "react";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
+import { FormHelperText } from '@mui/material';
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 
 type SingleSelectProps = {
 	selectedValue: string;
 	label: string;
 	options: string[];
+	helperText?: string;
 	onChange: (value: string) => void;
 };
 
@@ -39,6 +41,7 @@ export default function SelectAutoWidth(props: SingleSelectProps) {
 						);
 					})}
 				</Select>
+				<FormHelperText>{props.helperText}</FormHelperText>
 			</FormControl>
 		</div>
 	);
