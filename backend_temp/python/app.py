@@ -6,10 +6,11 @@ from data_processing.dataService import DataService
 from data_processing.wiki_history_helper import (
     get_page_with_max_edits,
     get_user_with_max_edits,
+    add_is_reverted,
 )
 from tqdm import tqdm
 
-filename = "./backend_temp/raw_data/diffBy=time_stamp_groupBy=article_id.csv"
+filename = "./backend_temp/raw_data/diffBy=diff_groupBy=article_id.csv"
 
 # check file extension
 sep = ","
@@ -45,13 +46,13 @@ reader = pd.read_csv(
 )
 df = reader.get_chunk(50000)
 app = Flask(__name__)
-print(get_page_with_max_edits(df))
 CORS(app)
 
 ds = DataService(df, {"time_stamp": "dateTime"})
 ds.split_time("time_stamp")
-ds.add_time_till_event("2016-11-08", "time_till_election", "time_stamp")
 ds.df.to_csv("diffBy=diff_groupBy=article_id.csv", sep=",")
+
+add_is_reverted(ds.df, "is_reverted")
 
 @app.route("/")
 def hello_world():
