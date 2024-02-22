@@ -51,7 +51,7 @@ CORS(app)
 ds = DataService(df, {"time_stamp": "dateTime"})
 ds.split_time("time_stamp")
 ds.df.to_csv("diffBy=diff_groupBy=article_id.csv", sep=",")
-
+ds.add_time_till_event("2016-11-08 00:00:00", "time_till_election", "time_stamp")
 add_is_reverted(ds.df, "is_reverted")
 
 @app.route("/")
