@@ -6,6 +6,7 @@ import { LineChartType, ScatterplotType } from "./types/PlotsTypes";
 import DataService from "./services/dataService";
 import { FILTER_LAYOUT } from "./layout/filterLayout";
 import { LaNePlotFilterOptions, LaNePlotFilters } from "./types/FilterTypes";
+import helper_img from "./static/images/quadrant_labels.drawio.png";
 
 const HOST = "http://localhost:5000";
 const ds = new DataService(HOST);
@@ -14,6 +15,7 @@ function getScatterplot(shownPlot: string, data: any, attList: any) {
 	const xLabel = ["diffNext", shownPlot].join("_");
 	const yLabel = ["diffPrev", shownPlot].join("_");
 	const idField = "unique_id";
+	// const colorField = "time_till_election";
 	const colorField = "is_reverted";
 	const plotData = ds.scatterplotifyData(
 		data,
@@ -93,7 +95,7 @@ function App() {
 					filterMap.sliceByValue,
 					shownPlot,
 					"time_stamp",
-					["article_title", "comment", "rev_id", "is_reverted"]
+					["article_title", "comment", "rev_id", "is_reverted", "time_till_election"]
 				);
 			});
 			const plotPromises = Promise.all(dataPromises).then((datasets) => {
@@ -149,6 +151,12 @@ function App() {
 			<div>
 				<LaNePlots activePlots={activePlots}></LaNePlots>
 			</div>
+			
+			<div style={{"color" : "red"}}>red = reversions</div>
+			<div>
+				<img src={helper_img} alt="quadrant_labels" width="700" height="500" />
+			</div>
+			
 		</div>
 	);
 }

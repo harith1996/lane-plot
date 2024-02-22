@@ -288,7 +288,6 @@ export default function Scatterplot(props: ScatterplotProps) {
 				.attr("cy", (d) => yScale(d.y))
 				.attr("r", 3)
 				.attr("opacity", 0.4)
-				.attr("fill", "steelblue")
 				.attr("fill", (d:any) => {
 					if(d.colorField){
 						return "red";
@@ -297,6 +296,9 @@ export default function Scatterplot(props: ScatterplotProps) {
 						return "steelblue";
 					}
 				});
+				// .attr("fill", (d:any) => {
+				// 	return colorScale(d.colorField);
+				// });
 
 			const scaleXCopy = xScale.copy();
 			const scaleYCopy = yScale.copy();
