@@ -99,7 +99,7 @@ class DataService:
                         case _:
                             out[filterName] = []
                 case "shownPlots":
-                    out[filterName] = ["diff", "size", "time_stamp"]
+                    out[filterName] = ["diff", "size", "time_stamp", "relSize", "relDiff"]
                 case "eventType":
                     out[filterName] = []
                 case _:
