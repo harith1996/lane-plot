@@ -154,7 +154,7 @@ function App() {
 			
 			<div style={{"color" : "red"}}>red = reversions</div>
 			<div>
-				<img src={helper_img} alt="quadrant_labels" width="700" height="500" />
+				<img src={helper_img} alt="quadrant_labels" width="900" height="400" />
 			</div>
 			
 		</div>
