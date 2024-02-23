@@ -149,13 +149,6 @@ export default function Scatterplot(props: ScatterplotProps) {
 					.text(plot.labels.yLabel);
 			};
 
-			const tooltip = (event: any, data: any) => {
-				const x = xScale(0) + 6;
-				const y = margin.top;
-				console.log(event);
-				console.log(data);
-			};
-
 			svg.select(".x-axis").call(xAxis, xScale, yScale);
 			svg.select(".y-axis").call(yAxis, yScale, xScale);
 			svg.select(".x-label").call(xLabel, yScale);
@@ -195,21 +188,21 @@ export default function Scatterplot(props: ScatterplotProps) {
 					.scaleSequentialSymlog(d3.interpolateBlues)
 					.domain([0, Math.max(...bins.map((b) => b.length))]);
 
-				const onBinSelect = function (event: any, d: any) {
-					let selection = d.map((d: any) => d.id);
-					if (d.isSelected) {
-						//unselect this bin
-						d.isSelected = false;
-						selectionCallback(
-							selectedIds.filter((id) => !selection.includes(id))
-						);
-					} else {
-						if (event.ctrlKey) {
-							selection = [...selectedIds, ...selection];
-						}
-						selectionCallback(selection);
-					}
-				};
+				// const onBinSelect = function (event: any, d: any) {
+				// 	let selection = d.map((d: any) => d.id);
+				// 	if (d.isSelected) {
+				// 		//unselect this bin
+				// 		d.isSelected = false;
+				// 		selectionCallback(
+				// 			selectedIds.filter((id) => !selection.includes(id))
+				// 		);
+				// 	} else {
+				// 		if (event.ctrlKey) {
+				// 			selection = [...selectedIds, ...selection];
+				// 		}
+				// 		selectionCallback(selection);
+				// 	}
+				// };
 				plotArea
 					.selectAll("path")
 					.data(bins)
@@ -284,10 +277,6 @@ export default function Scatterplot(props: ScatterplotProps) {
 					.on("mouseout", onDotMouseOut)
 					.transition()
 					.duration(300)
-					// .attr(
-					// 	"transform",
-					// 	(d) => `translate(${xScale(d.x)},${yScale(d.y)})`
-					// )
 					.attr("cx", (d) => xScale(d.x))
 					.attr("cy", (d) => yScale(d.y))
 					.attr("r", 3)
