@@ -24,6 +24,7 @@ export type ScatterplotType = {
 	labels: PlotLabels;
 	options: PlotOptions;
 	data: ScatterplotDataPoint[];
+	isBinned: boolean;
 };
 
 export type LineChartType = {
