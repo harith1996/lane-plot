@@ -6,10 +6,11 @@ from data_processing.dataService import DataService
 from data_processing.wiki_history_helper import (
     get_page_with_max_edits,
     get_user_with_max_edits,
+    add_is_reverted,
 )
 from tqdm import tqdm
 
-filename = "./backend_temp/raw_data/diffBy=event_timestamp_groupBy=event_user_id.csv"
+filename = "./backend_temp/raw_data/diffBy=size_groupBy=article_id.csv"
 
 # check file extension
 sep = ","
@@ -33,24 +34,25 @@ reader = pd.read_csv(
     # skiprows = lambda i : i > 1000,
     on_bad_lines="skip",
     sep=sep,
-    dtype={
-        "event_user_id": str,
-        "page_id": str,
-        "user_id": str,
-        "revision_id": str,
-        "revision_parent_id": str,
-        "revision_first_identity_reverting_revision_id": str,
-    },
+    # dtype={
+    #     "event_user_id": str,
+    #     "page_id": str,
+    #     "user_id": str,
+    #     "revision_id": str,
+    #     "revision_parent_id": str,
+    #     "revision_first_identity_reverting_revision_id": str,
+    # },
     names=columns,
 )
 df = reader.get_chunk(50000)
 app = Flask(__name__)
-print(get_page_with_max_edits(df))
 CORS(app)
 
-ds = DataService(df, {"event_timestamp": "dateTime"})
-ds.split_time("event_timestamp")
-
+ds = DataService(df, {"time_stamp": "dateTime"})
+ds.split_time("time_stamp")
+ds.df.to_csv("diffBy=diff_groupBy=article_id.csv", sep=",")
+ds.add_time_till_event("2016-11-08 00:00:00", "time_till_election", "time_stamp")
+add_is_reverted(ds.df, "is_reverted")
 
 @app.route("/")
 def hello_world():
@@ -85,6 +87,7 @@ def get_data():
     # extract arguments from request
     filter_col = request.args.get("filterColumn")
     filter_val = request.args.get("filterValue")
+
     attributes = request.args.get("attributes").split(",")
     return ds.get_eq_filtered_data(attributes, filter_col, filter_val)
 
@@ -98,7 +101,8 @@ def get_filter_values():
 def get_diff_list():
     fieldName = request.args.get("fieldName")
     linearOrderBy = request.args.get("linearOrderBy")
-    out = ds.get_diff_list(fieldName, linearOrderBy)
+    relative = request.args.get("relative")
+    out = ds.get_diff_list(fieldName, linearOrderBy, relative)
     return out
 
 
@@ -107,21 +111,33 @@ def add_diff_list():
     fieldName = request.args.get("fieldName").split(",")[0]
     linearOrderBy = request.args.get("linearOrderBy")
     groupBy = request.args.get("groupBy")
+    relative = request.args.get("relative", type=bool, default=False)
     diffList = []
     distinctValues = list(df[groupBy].unique())
     for val in tqdm(distinctValues, desc="Computing diffs"):
         filteredDf = ds.get_filtered_df(groupBy, val, ds.df)
-        diffList += ds.get_diff_list(fieldName, linearOrderBy, filteredDf)
-    prevFieldName = "_".join(["diffPrev", fieldName])
-    prevValues = list(map(lambda x: [x["unique_id"], x["diffPrev"]], diffList))
-    nextFieldName = "_".join(["diffNext", fieldName])
-    nextValues = list(map(lambda x: [x["unique_id"], x["diffNext"]], diffList))
+        diffList += ds.get_diff_list(fieldName, linearOrderBy, relative, filteredDf)
+    [nextCol,prevCol] = ds.get_diff_col_names(relative)
+    prevFieldName = "_".join([prevCol, fieldName])
+    prevValues = list(map(lambda x: [x["unique_id"], x[prevCol]], diffList))
+    nextFieldName = "_".join([nextCol, fieldName])
+    nextValues = list(map(lambda x: [x["unique_id"], x[nextCol]], diffList))
     ds.add_values_by_id(prevFieldName, prevValues)
     ds.add_values_by_id(nextFieldName, nextValues)
     print(ds.df)
     ds.df.to_csv("diffBy=" + fieldName + "_groupBy=" + groupBy + ".csv", sep=",")
     return jsonify(diffList)
 
+@app.route(f"/get-human-readable-name")
+def get_human_readable_name():
+    fieldName = request.args.get("fieldName")
+    fieldValue = request.args.get("fieldValue")
+    res  = {
+        "fieldName": fieldName,
+        "fieldValue": fieldValue,
+        "humanReadableName": ds.get_human_readable_name(fieldName, fieldValue)
+    }
+    return jsonify(res)
 
 if __name__ == "__main__":
     app.run(debug=False)

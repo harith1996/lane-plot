@@ -22,15 +22,27 @@ class DataService:
         df["Day"] = df[timeFieldName].dt.day
         df["Day of Week"] = df[timeFieldName].dt.dayofweek
         df["Hour"] = df[timeFieldName].dt.hour
-        df["Timestamp"] = (
-            df[timeFieldName] - pd.Timestamp("1970-01-01")
+        # df[timeFieldName] = df.apply(lambda x: x[timeFieldName].tz_convert("utc").tz_localize(None), axis=1)
+        df["Timestamp"] = pd.to_timedelta(df[timeFieldName] - pd.Timestamp("1970-01-01"), unit="S") // pd.Timedelta('1s')
+
+    def add_time_till_event(
+        self,
+        event_time_str: str,
+        as_name: str = "time_till",
+        time_column_name: str = "event_timestamp",
+    ):
+        df = self.df
+        df[as_name] = (
+            df[time_column_name] - pd.Timestamp(event_time_str)
         ) // pd.Timedelta("1s")
+        # return dataframe
+        return df
 
     def get_eq_filtered_data(
         self,
         columns,
         filter_col,
-        filter_val,
+        filter_val
     ):
         df = self.df
         out_attributes = columns + [self.idFieldName]
@@ -56,24 +68,25 @@ class DataService:
             "shownPlots": [],
             "eventType": [],
         }
+        #get default values from diffby and linearizeBy in file name
         for filterName in filterMap:
             match filterName:
                 case "linearizeBy":
                     out[filterName] = []
                 case "sliceBy":
                     out[filterName] = [
-                        "page_id",
+                        "article_id",
                         "event_user_id",
                     ]
                 case "sliceByValue":
                     match filterMap["sliceBy"]:
-                        case "page_id":
+                        case "article_id":
                             out[filterName] = [
-                                "74804817",
-                                "1952670",
-                                "74199488",
-                                "70308452",
-                                "68401269",
+                                "49514870",
+                                "52547512",
+                                "37816935",
+                                "54266373",
+                                "45623450",
                             ]
                         case "event_user_id":
                             out[filterName] = [
@@ -86,15 +99,22 @@ class DataService:
                         case _:
                             out[filterName] = []
                 case "shownPlots":
-                    out[filterName] = ["revision_text_bytes", "event_timestamp"]
+                    out[filterName] = ["diff", "size", "time_stamp", "relSize", "relDiff"]
                 case "eventType":
                     out[filterName] = []
                 case _:
                     out[filterName] = []
         return out
 
+    def get_diff_col_names(self, relative=False):
+        
+        [nextCol, prevCol] = ["diffNext", "diffPrev"]
+        if(relative):
+            [nextCol, prevCol] = ["relDiffNext", "relDiffPrev"]
+        return [nextCol, prevCol]
+    
     # TODO: add values directly to dataframe
-    def get_diff_list(self, fieldName, linearOrderBy, df=None):
+    def get_diff_list(self, fieldName, linearOrderBy, relative=False, df=None):
         # sort dataframe by df
         sortedDf = self.get_sorted_df(linearOrderBy, df)
         # get list of values for column fieldName
@@ -112,8 +132,9 @@ class DataService:
             fieldType = self.df.dtypes[fieldName].name
 
         # initialize diffComputer
-        diffC = DiffComputer(fieldType, relative=True)
+        diffC = DiffComputer(fieldType, relative=relative)
 
+        [nextCol, prevCol] = self.get_diff_col_names(relative)
         # compute diffs
         diffList = []
         if len(values) == 1:
@@ -122,14 +143,14 @@ class DataService:
             for i in range(len(values)):
                 item = {}
                 if i == 0:
-                    item["diffPrev"] = None
-                    item["diffNext"] = diffC.compute_diff(values[i + 1], values[i])
+                    item[prevCol] = None
+                    item[nextCol] = diffC.compute_diff(values[i + 1], values[i])
                 elif i == len(values) - 1:
-                    item["diffPrev"] = diffC.compute_diff(values[i - 1], values[i])
-                    item["diffNext"] = None
+                    item[prevCol] = diffC.compute_diff(values[i - 1], values[i])
+                    item[nextCol] = None
                 else:
-                    item["diffPrev"] = diffC.compute_diff(values[i - 1], values[i])
-                    item["diffNext"] = diffC.compute_diff(values[i + 1], values[i])
+                    item[prevCol] = diffC.compute_diff(values[i - 1], values[i])
+                    item[nextCol] = diffC.compute_diff(values[i + 1], values[i])
 
                 item[self.idFieldName] = int(keyValuePairs[i][0])
                 diffList.append(item)
@@ -155,8 +176,15 @@ class DataService:
     # TODO: improve performance
     def add_values_by_id(self, fieldName, keyValuePairs):
         df = self.df
-        for keyValuePair in keyValuePairs:
+        for keyValuePair in tqdm(keyValuePairs, desc="Mapping diffs"):
             df.loc[
                 df[self.idFieldName] == int(keyValuePair[0]), fieldName
             ] = keyValuePair[1]
         return df
+    
+    def get_human_readable_name(self, fieldName, fieldValue):
+        df = self.df
+        if(fieldName == "article_id"):
+            #fetch the article from data
+            article = df.loc[df["article_id"] == int(fieldValue)]
+            return article["article_title"].iloc[0]

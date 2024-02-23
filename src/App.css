@@ -55,4 +55,24 @@
     align-items: start;
     justify-content:start;
   }
+
+  .tooltip {
+    position: absolute;
+    width: 200px;
+    height: 100px;
+    background-color: #c1d5fa;
+    border: 1px solid grey;
+    border-radius: 5px;
+    padding: 10px;
+    z-index: 100;
+    display: none;
+    overflow: ellipsis;
+
+  }
   
+  .controls {
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    justify-content:start;
+  }

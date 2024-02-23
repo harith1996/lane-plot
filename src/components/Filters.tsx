@@ -38,10 +38,12 @@ export default function Filters({
 	filterValues,
 	filterOptions,
 	onFilterChange,
+	getHelperText: fetchHelperText,
 }: {
 	filterValues: LaNePlotFilters;
 	filterOptions: LaNePlotFilterOptions;
 	onFilterChange: any;
+	getHelperText: (filter: string, value: string) => Promise<any>;
 }) {
 	//Filter states
 	const [linearizeBy, setLinearizeBy] = React.useState<string>(
@@ -54,6 +56,8 @@ export default function Filters({
 	const [sliceByValue, setSliceByValue] = React.useState<any>(
 		filterValues.sliceByValue
 	);
+	const [sliceByValueHelperText, setSliceByValueHelperText] =
+		React.useState<string>("");
 	const [shownPlots, setShownPlots] = React.useState<string[]>(
 		filterValues.shownPlots
 	);
@@ -110,6 +114,9 @@ export default function Filters({
 			sliceByValue: value,
 			shownPlots: shownPlots,
 		});
+		fetchHelperText(sliceBy, value).then((helperText) => {
+			setSliceByValueHelperText(helperText); //fetch new data
+		});
 		//fetch new data
 	};
 	const onShownPlotsChange = (value: string[]) => {
@@ -137,7 +144,11 @@ export default function Filters({
 					options={sliceByValueOptions}
 					selectedValue={sliceByValue}
 					onChange={onSliceByValueChange}
+					helperText={sliceByValueHelperText}
 				></SingleSelect>
+				<div className="filter-details">
+					<></>
+				</div>
 			</div>
 			<div className="filter-group">
 				<MultiSelect

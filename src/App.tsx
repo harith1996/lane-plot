@@ -2,23 +2,26 @@ import React, { useEffect } from "react";
 import "./App.css";
 import Filters from "./components/Filters";
 import LaNePlots from "./components/LaNePlots";
-import { LineChartType, ScatterplotType } from "./types/PlotsTypes";
 import DataService from "./services/dataService";
-import { FILTER_LAYOUT } from "./layout/filterLayout";
 import { LaNePlotFilterOptions, LaNePlotFilters } from "./types/FilterTypes";
+import helper_img from "./static/images/quadrant_labels.drawio.png";
+import VisControls from "./components/VisControls";
 
 const HOST = "http://localhost:5000";
 const ds = new DataService(HOST);
 
-function getScatterplot(shownPlot: string, data: any, attList: any) {
+function getScatterplot(shownPlot: string, data: any, attList: any, isBinned: boolean) {
 	const xLabel = ["diffNext", shownPlot].join("_");
 	const yLabel = ["diffPrev", shownPlot].join("_");
 	const idField = "unique_id";
+	// const colorField = "time_till_election";
+	const colorField = "is_reverted";
 	const plotData = ds.scatterplotifyData(
 		data,
 		xLabel,
 		yLabel,
 		idField,
+		colorField,
 		attList
 	);
 	return {
@@ -30,6 +33,7 @@ function getScatterplot(shownPlot: string, data: any, attList: any) {
 			xDomain: undefined, //compute domain from min-max
 			yDomain: undefined,
 		},
+		isBinned: isBinned,
 		data: plotData,
 	};
 }
@@ -64,9 +68,10 @@ function getLineChart(
 }
 
 function App() {
+	const [plotType, setPlotType] = React.useState<string>("Normal");
 	const [activePlots, setActivePlots] = React.useState<any[]>([]);
 	const [filterMap, setFilterMap] = React.useState<LaNePlotFilters>({
-		linearizeBy: "event_timestamp",
+		linearizeBy: "time_stamp",
 		eventType: "",
 		sliceBy: "",
 		sliceByValue: "",
@@ -89,16 +94,24 @@ function App() {
 				return ds.fetchData(
 					filterMap.sliceBy,
 					filterMap.sliceByValue,
-					shownPlot
+					shownPlot,
+					"time_stamp",
+					[
+						"article_title",
+						"comment",
+						"rev_id",
+						"is_reverted",
+						"time_till_election",
+					]
 				);
 			});
 			const plotPromises = Promise.all(dataPromises).then((datasets) => {
 				const scatterplots = datasets.map((dataset) => {
 					const reqAttributes = dataset.reqAttributes;
+					const attList = reqAttributes.split(",");
 					const data = dataset.data;
 					const shownPlot = dataset.shownPlot;
-					const attList = reqAttributes.split(",");
-					return getScatterplot(shownPlot, data, attList);
+					return getScatterplot(shownPlot, data, attList, plotType === "Binned");
 				});
 				const linecharts = datasets.map((dataset) => {
 					const reqAttributes = dataset.reqAttributes;
@@ -124,9 +137,7 @@ function App() {
 				setActivePlots(active);
 			});
 		});
-
-		//fetch new filter options
-	}, [filterMap]);
+	}, [filterMap, plotType]);
 
 	const onFilterChange = (filterMap: LaNePlotFilters) => {
 		setFilterMap(filterMap);
@@ -134,17 +145,31 @@ function App() {
 
 	return (
 		<div className="App">
-			<div>
+			<div className="controls">
 				<Filters
 					filterValues={filterMap}
 					filterOptions={filterOptions}
 					onFilterChange={onFilterChange}
+					getHelperText={ds.fetchHumanReadableEntityName.bind(ds)}
 				></Filters>
+				<VisControls
+					plotType={plotType}
+					plotOptions={["Normal", "Binned"]}
+					onPlotTypeChange={setPlotType}
+				></VisControls>
 			</div>
 			<div>
-				<LaNePlots
-					activePlots={activePlots}
-				></LaNePlots>
+				<LaNePlots activePlots={activePlots}></LaNePlots>
+			</div>
+
+			<div style={{ color: "red" }}>red = reversions</div>
+			<div>
+				<img
+					src={helper_img}
+					alt="quadrant_labels"
+					width="900"
+					height="400"
+				/>
 			</div>
 		</div>
 	);
