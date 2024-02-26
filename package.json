@@ -30,7 +30,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "concurrently --kill-others \"npm start\" \"python ./backend_temp/python/app.py\""
+    "dev": "concurrently --kill-others \"npm start\" \"/Users/gines/miniconda3/envs/lane/python ./backend_temp/python/app.py\""
   },
   "eslintConfig": {
     "extends": [
@@ -51,6 +51,7 @@
     ]
   },
   "devDependencies": {
-    "@types/d3-hexbin": "^0.2.5"
+    "@types/d3-hexbin": "^0.2.5",
+    "concurrently": "^8.2.2"
   }
 }

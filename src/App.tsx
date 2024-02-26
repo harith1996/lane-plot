@@ -66,7 +66,7 @@ function getLineChart(
 function App() {
 	const [activePlots, setActivePlots] = React.useState<any[]>([]);
 	const [filterMap, setFilterMap] = React.useState<LaNePlotFilters>({
-		linearizeBy: "event_timestamp",
+		linearizeBy: "timestamp",
 		eventType: "",
 		sliceBy: "",
 		sliceByValue: "",

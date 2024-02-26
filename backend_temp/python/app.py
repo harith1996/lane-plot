@@ -9,7 +9,7 @@ from data_processing.wiki_history_helper import (
 )
 from tqdm import tqdm
 
-filename = "./backend_temp/raw_data/diffBy=event_timestamp_groupBy=event_user_id.csv"
+filename = "./backend_temp/raw_data/Earth.csv"
 
 # check file extension
 sep = ","
@@ -33,23 +33,23 @@ reader = pd.read_csv(
     # skiprows = lambda i : i > 1000,
     on_bad_lines="skip",
     sep=sep,
-    dtype={
-        "event_user_id": str,
-        "page_id": str,
-        "user_id": str,
-        "revision_id": str,
-        "revision_parent_id": str,
-        "revision_first_identity_reverting_revision_id": str,
-    },
+    # dtype={
+    #     "event_user_id": str,
+    #     "page_id": str,
+    #     "user_id": str,
+    #     "revision_id": str,
+    #     "revision_parent_id": str,
+    #     "revision_first_identity_reverting_revision_id": str,
+    # },
     names=columns,
 )
 df = reader.get_chunk(50000)
 app = Flask(__name__)
-print(get_page_with_max_edits(df))
+# print(get_page_with_max_edits(df))
 CORS(app)
 
-ds = DataService(df, {"event_timestamp": "dateTime"})
-ds.split_time("event_timestamp")
+ds = DataService(df, {})
+# ds.split_time("event_timestamp")
 
 
 @app.route("/")
