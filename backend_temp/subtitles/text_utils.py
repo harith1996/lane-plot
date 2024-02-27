@@ -47,6 +47,8 @@ def tag_type_distance(tag, df_wtype, delta=1, mode="avg"):
     df_wtype["pos"] = list(df_wtype.index)
     df_wtype.reset_index(drop=True, inplace=True)
 
+    if len(df_wtype) <= delta:
+        return pd.DataFrame()
     return lane_func(df_wtype, "pos", delta)
 
 
@@ -59,7 +61,7 @@ def word_type_distances(tokens, delta=1, mode="avg", tags=WORD_TAG_TYPES):
     df["word_type"] = df["tag"].apply(classify_tag)
 
     if delta == 1:
-        return simple_type_distance(df)
+        return simple_type_distance(df, tags=tags)
 
     lane_dfs = []
     for word_type in tags:
@@ -69,20 +71,20 @@ def word_type_distances(tokens, delta=1, mode="avg", tags=WORD_TAG_TYPES):
     return lane_dfs
 
 
-def simple_type_distance(df):
+def simple_type_distance(df, tags=WORD_TAG_TYPES):
 
     lane_dfs = []
-    for word_type in WORD_TAG_TYPES:
+    for word_type in tags:
         df_wtype = df.copy()
 
         df_wtype = df_wtype[df_wtype["word_type"] == word_type]
         df_wtype["pos"] = list(df_wtype.index)
 
         df_wtype["last"] = df_wtype["pos"].diff()
-        df_wtype["last"].fillna(0)
+        df_wtype["last"] = df_wtype["last"].fillna(0)
 
         df_wtype["next"] = df_wtype["pos"].shift(-1) - df_wtype["pos"]
-        df_wtype["next"].fillna(0)
+        df_wtype["next"] = df_wtype["next"].fillna(0)
 
         #df_wtype = df_wtype.groupby(["last", "next"]).size().reset_index(name='count')
 

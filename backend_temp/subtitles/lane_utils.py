@@ -2,8 +2,10 @@ from matplotlib import pyplot as plt
 import numpy as np
 import math
 
-MIN_LANE_DIST = 0
-MAX_LANE_DIST = 20
+from plot_utils import plot_config
+
+MIN_LANE_DIST = -1
+MAX_LANE_DIST = 1
 
 
 def delta_lane(df, key="timestamp", delta=1):
@@ -101,28 +103,6 @@ def get_lane_distance(df1, df2, max_lane=MAX_LANE_DIST):
 
     return dist_sum, df1_sum+df2_sum
 
-def line_chart(series, file=" ", title="", to_file=False):
-    # y = [0.]
-    # x = [0.]
-    #
-    # for i, element in enumerate(series):
-    #     x.append(element.timestamp())
-    #     y.append(i+1)
-    #
-    # plt.plot(x, y)
-    plt.plot(series)
-
-    plot_title = file+" line chart "+title
-    plt.title(plot_title)
-
-    # plt.xlim(0, x[-1])
-
-    if to_file:
-        fig_name = "plots/" + plot_title.replace(":", "colon").replace(";", "semicolon").replace(",", "comma").replace(".", "period") + ".png"
-        plt.savefig(fig_name)
-    else:
-        plt.show()
-    plt.clf()
 
 def lane_chart(df, file="", title="", last="last", next="next", color=None, to_file=False, size=None, min_lane=MIN_LANE_DIST, max_lane=MAX_LANE_DIST, scale=None):
     # group_df = df.groupby(["last_f", "next_f"]).size().reset_index(name='count')
@@ -130,60 +110,56 @@ def lane_chart(df, file="", title="", last="last", next="next", color=None, to_f
         size = 25*df[size].apply(math.log)
         # size = df[size]/10
     else:
-        size = 1
+        size = 8
 
     if color:
-        plt.scatter(df[last], df[next], c=df[color], cmap="viridis", s=size)
+        plt.scatter(df[last], df[next], c=df[color], cmap="viridis", s=size, alpha=0.7)
     else:
         plt.scatter(df[last], df[next], s=size)
 
-    plot_title = file+" LaNe chart "+title
-    plt.title(plot_title)
     plt.xlabel("last")
     plt.ylabel("next")
     plt.colorbar()
 
-    plt.ylim([0, max_lane])
-    plt.xlim([0, max_lane])
+    plt.ylim([min_lane, max_lane])
+    plt.xlim([min_lane, max_lane])
 
     if scale == "log":
         plt.yscale('log')
         plt.xscale('log')
 
-    if to_file:
-        fig_name = "plots/" + plot_title.replace(":", "colon").replace(";", "semicolon").replace(",", "comma").replace(".", "period") + ".png"
-        plt.savefig(fig_name)
-    else:
-        plt.show()
-    plt.clf()
+    plot_config(file=file, title=title, to_file=to_file)
 
-def lane_hist(df, file="", title="", to_file=False, last="last", next="next", nbins=50, scale=None):
+def lane_hist(df, file="", title="", to_file=False, nbins=50, scale=None, adjust_bins=True, draw_axis_lines=False, x_bins=None, y_bins=None):
     x = df["last"]
     y = df["next"]
 
-    # Adjust nbins if few space
-    nbins = int(min(nbins, x.max(), y.max()))
-
-    if scale == "log":
-        x_bins = [0]+np.logspace(0, np.log10(x.max()), nbins-1)
-        y_bins = [0]+np.logspace(0, np.log10(y.max()), nbins-1)
-        plt.xscale('log')
-        plt.yscale('log')
+    if x_bins and y_bins:
+        x_bins = [x_bins[0] + i * (x_bins[1] - x_bins[0]) / nbins for i in range(nbins)]+[x_bins[1]]
+        y_bins = [y_bins[0] + i * (y_bins[1] - y_bins[0]) / nbins for i in range(nbins)]+[y_bins[1]]
     else:
-        x_bins = [i*x.max()/nbins for i in range(nbins)]
-        y_bins = [i*y.max()/nbins for i in range(nbins)]
+        # Adjust nbins if few space
+        if adjust_bins:
+            nbins = int(min(nbins, x.max(), y.max()))
+
+        if scale == "log":
+            x_bins = [0]+np.logspace(0, np.log10(x.max()), nbins-1)
+            y_bins = [0]+np.logspace(0, np.log10(y.max()), nbins-1)
+            plt.xscale('log')
+            plt.yscale('log')
+        else:
+            x_bins = [x.min()+i*(x.max()-x.min())/nbins for i in range(nbins)]
+            y_bins = [y.min()+i*(y.max()-y.min())/nbins for i in range(nbins)]
 
     plt.hist2d(x, y, [x_bins, y_bins], cmin=1, cmap="viridis")
 
-    plot_title = file+" LaNe chart "+title
-    plt.title(plot_title)
     plt.xlabel("last")
     plt.ylabel("next")
+
     plt.colorbar()
 
-    if to_file:
-        fig_name = "plots/" + plot_title.replace(":", "colon").replace(";", "semicolon").replace(",", "comma").replace(".", "period") + ".png"
-        plt.savefig(fig_name)
-    else:
-        plt.show()
-    plt.clf()
+    if draw_axis_lines:
+        plt.axhline(0, color="black")
+        plt.axvline(0, color="black")
+
+    plot_config(file=file, title=title, to_file=to_file)
