@@ -7,12 +7,21 @@ from data_processing.diffComputer import DiffComputer
 
 class DataService:
     def __init__(
-        self, df: pd.DataFrame, fieldTypeMap: dict, idFieldName: str = "unique_id"
+        self, df: pd.DataFrame, fieldTypeMap: dict, idFieldName: str = "unique_id", fileName: str = None
     ):
         self.df = df
         self.fieldTypeMap = fieldTypeMap
         self.idFieldName = idFieldName
         self.df[self.idFieldName] = list(range(df.shape[0]))
+        self.diffBy = None
+        self.groupBy = None
+        #split filename to get diffBy and groupBy
+        if(fileName != None):
+            fileName = fileName.split("/")[-1]
+            fileName = fileName.split(".")[0]
+            fileName = fileName.split(",")
+            self.diffBy = fileName[0].split("=")[1]
+            self.groupBy = fileName[1].split("=")[1]
 
     def split_time(self, timeFieldName):
         df = self.df
@@ -61,6 +70,7 @@ class DataService:
         return filteredDf
 
     def get_filter_values(self, filterMap: dict, df=None):
+        df = self.df
         out = {
             "linearizeBy": [],
             "sliceBy": [],
@@ -75,31 +85,14 @@ class DataService:
                     out[filterName] = []
                 case "sliceBy":
                     out[filterName] = [
-                        "article_id",
-                        "event_user_id",
+                        self.groupBy
                     ]
                 case "sliceByValue":
                     match filterMap["sliceBy"]:
-                        case "article_id":
-                            out[filterName] = [
-                                "49514870",
-                                "52547512",
-                                "37816935",
-                                "54266373",
-                                "45623450",
-                            ]
-                        case "event_user_id":
-                            out[filterName] = [
-                                "3455093",
-                                "7903804",
-                                "7852030",
-                                "2842084",
-                                "15996738",
-                            ]
                         case _:
-                            out[filterName] = []
+                            out[filterName] = df[self.groupBy].unique().tolist()
                 case "shownPlots":
-                    out[filterName] = ["diff", "size", "time_stamp", "relSize", "relDiff"]
+                    out[filterName] = ["size", "timestamp", "relSize", "relDiff"]
                 case "eventType":
                     out[filterName] = []
                 case _:
@@ -188,3 +181,5 @@ class DataService:
             #fetch the article from data
             article = df.loc[df["article_id"] == int(fieldValue)]
             return article["article_title"].iloc[0]
+        elif(fieldName == "page_name"):
+            return fieldValue
