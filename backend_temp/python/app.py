@@ -10,7 +10,7 @@ from data_processing.wiki_history_helper import (
 )
 from tqdm import tqdm
 
-filename = "./backend_temp/raw_data/diffBy=size_groupBy=article_id.csv"
+filename = "./backend_temp/raw_data/diffBy=size,groupBy=page_name.csv"
 
 # check file extension
 sep = ","
@@ -48,10 +48,9 @@ df = reader.get_chunk(50000)
 app = Flask(__name__)
 CORS(app)
 
-ds = DataService(df, {"time_stamp": "dateTime"})
-ds.split_time("time_stamp")
-ds.df.to_csv("diffBy=diff_groupBy=article_id.csv", sep=",")
-ds.add_time_till_event("2016-11-08 00:00:00", "time_till_election", "time_stamp")
+ds = DataService(df, {"timestamp": "dateTime"}, fileName=filename)
+ds.split_time("timestamp")
+# ds.add_time_till_event("2016-11-08 00:00:00", "time_till_election", "time_stamp")
 add_is_reverted(ds.df, "is_reverted")
 
 @app.route("/")
@@ -125,7 +124,7 @@ def add_diff_list():
     ds.add_values_by_id(prevFieldName, prevValues)
     ds.add_values_by_id(nextFieldName, nextValues)
     print(ds.df)
-    ds.df.to_csv("diffBy=" + fieldName + "_groupBy=" + groupBy + ".csv", sep=",")
+    ds.df.to_csv("diffBy=" + fieldName + ",groupBy=" + groupBy + ".csv", sep=",")
     return jsonify(diffList)
 
 @app.route(f"/get-human-readable-name")
