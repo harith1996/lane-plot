@@ -71,7 +71,7 @@ function App() {
 	const [plotType, setPlotType] = React.useState<string>("Normal");
 	const [activePlots, setActivePlots] = React.useState<any[]>([]);
 	const [filterMap, setFilterMap] = React.useState<LaNePlotFilters>({
-		linearizeBy: "time_stamp",
+		linearizeBy: "timestamp",
 		eventType: "",
 		sliceBy: "",
 		sliceByValue: "",
@@ -95,13 +95,13 @@ function App() {
 					filterMap.sliceBy,
 					filterMap.sliceByValue,
 					shownPlot,
-					"time_stamp",
+					"timestamp",
 					[
-						"article_title",
+						"page_name",
 						"comment",
 						"rev_id",
 						"is_reverted",
-						"time_till_election",
+						"tags"
 					]
 				);
 			});

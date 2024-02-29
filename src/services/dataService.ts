@@ -41,7 +41,7 @@ export default class DataService {
 		filterColumn: string = "event_user_id",
 		filterValue: string = "15996738",
 		shownPlot: string = "revision_text_bytes",
-		linearizeBy: string = "time_stamp",
+		linearizeBy: string = "timestamp",
 		extraColumns: string[] = []
 	) {
 		const xLabel = ["diffNext", shownPlot].join("_");
