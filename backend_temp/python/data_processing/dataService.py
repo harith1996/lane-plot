@@ -7,7 +7,11 @@ from data_processing.diffComputer import DiffComputer
 
 class DataService:
     def __init__(
-        self, df: pd.DataFrame, fieldTypeMap: dict, idFieldName: str = "unique_id", fileName: str = None
+        self,
+        df: pd.DataFrame,
+        fieldTypeMap: dict,
+        idFieldName: str = "unique_id",
+        fileName: str = None,
     ):
         self.df = df
         self.fieldTypeMap = fieldTypeMap
@@ -15,8 +19,8 @@ class DataService:
         self.df[self.idFieldName] = list(range(df.shape[0]))
         self.diffBy = None
         self.groupBy = None
-        #split filename to get diffBy and groupBy
-        if(fileName != None):
+        # split filename to get diffBy and groupBy
+        if fileName != None:
             fileName = fileName.split("/")[-1]
             fileName = fileName.split(".")[0]
             fileName = fileName.split(",")
@@ -31,8 +35,14 @@ class DataService:
         df["Day"] = df[timeFieldName].dt.day
         df["Day of Week"] = df[timeFieldName].dt.dayofweek
         df["Hour"] = df[timeFieldName].dt.hour
-        # df[timeFieldName] = df.apply(lambda x: x[timeFieldName].tz_convert("utc").tz_localize(None), axis=1)
-        df["Timestamp"] = pd.to_timedelta(df[timeFieldName] - pd.Timestamp("1970-01-01"), unit="S") // pd.Timedelta('1s')
+        try:
+            df[timeFieldName] = df.apply(
+                lambda x: x[timeFieldName].tz_convert("utc").tz_localize(None), axis=1
+            )
+        except:
+            df["Timestamp"] = pd.to_timedelta(
+                df[timeFieldName] - pd.Timestamp("1970-01-01"), unit="S"
+            ) // pd.Timedelta("1s")
 
     def add_time_till_event(
         self,
@@ -47,12 +57,7 @@ class DataService:
         # return dataframe
         return df
 
-    def get_eq_filtered_data(
-        self,
-        columns,
-        filter_col,
-        filter_val
-    ):
+    def get_eq_filtered_data(self, columns, filter_col, filter_val):
         df = self.df
         out_attributes = columns + [self.idFieldName]
         df_filtered = None
@@ -78,15 +83,13 @@ class DataService:
             "shownPlots": [],
             "eventType": [],
         }
-        #get default values from diffby and linearizeBy in file name
+        # get default values from diffby and linearizeBy in file name
         for filterName in filterMap:
             match filterName:
                 case "linearizeBy":
                     out[filterName] = []
                 case "sliceBy":
-                    out[filterName] = [
-                        self.groupBy
-                    ]
+                    out[filterName] = [self.groupBy]
                 case "sliceByValue":
                     match filterMap["sliceBy"]:
                         case _:
@@ -100,12 +103,12 @@ class DataService:
         return out
 
     def get_diff_col_names(self, relative=False):
-        
+
         [nextCol, prevCol] = ["diffNext", "diffPrev"]
-        if(relative):
+        if relative:
             [nextCol, prevCol] = ["relDiffNext", "relDiffPrev"]
         return [nextCol, prevCol]
-    
+
     # TODO: add values directly to dataframe
     def get_diff_list(self, fieldName, linearOrderBy, relative=False, df=None):
         # sort dataframe by df
@@ -170,16 +173,16 @@ class DataService:
     def add_values_by_id(self, fieldName, keyValuePairs):
         df = self.df
         for keyValuePair in tqdm(keyValuePairs, desc="Mapping diffs"):
-            df.loc[
-                df[self.idFieldName] == int(keyValuePair[0]), fieldName
-            ] = keyValuePair[1]
+            df.loc[df[self.idFieldName] == int(keyValuePair[0]), fieldName] = (
+                keyValuePair[1]
+            )
         return df
-    
+
     def get_human_readable_name(self, fieldName, fieldValue):
         df = self.df
-        if(fieldName == "article_id"):
-            #fetch the article from data
+        if fieldName == "article_id":
+            # fetch the article from data
             article = df.loc[df["article_id"] == int(fieldValue)]
             return article["article_title"].iloc[0]
-        elif(fieldName == "page_name"):
+        elif fieldName == "page_name":
             return fieldValue
