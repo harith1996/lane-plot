@@ -26,9 +26,8 @@ p = 1  # fraction of the data/
 # if random from [0,1] interval is greater than p the row will be skipped
 random.seed(4)
 
-reader = pd.read_csv(
+df = pd.read_csv(
     filename,
-    iterator=True,
     # header=0,
     skiprows=lambda i: i > 0 and random.random() > p,
     # skiprows = lambda i : i > 1000,
@@ -44,7 +43,6 @@ reader = pd.read_csv(
     # },
     names=columns,
 )
-df = reader.get_chunk(50000)
 app = Flask(__name__)
 CORS(app)
 
