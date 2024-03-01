@@ -62,13 +62,15 @@ export default function Scatterplot(props: ScatterplotProps) {
 
 			const xScale = d3
 				.scaleSymlog()
-				.domain(xDomain)
+				// .domain(xDomain)
+				.domain([-20000,20000])
 				.rangeRound([margin.left, width - margin.right])
 				.clamp(true);
 
 			const yScale = d3
 				.scaleSymlog()
-				.domain(yDomain.reverse())
+				// .domain(yDomain.reverse())
+				.domain([20000,-20000])
 				.rangeRound([margin.top, height - margin.bottom])
 				.clamp(true);
 
@@ -93,7 +95,9 @@ export default function Scatterplot(props: ScatterplotProps) {
 									.filter((v) => scale(v) !== undefined)
 							)
 							.tickSizeOuter(0)
-					);
+					)
+					.selectAll("*")
+					.attr("opacity", 0.8);
 			};
 
 			const yAxis = (
@@ -116,7 +120,9 @@ export default function Scatterplot(props: ScatterplotProps) {
 									.filter((v) => scale(v) !== undefined)
 							)
 							.tickSizeOuter(0)
-					);
+					)
+					.selectAll("*")
+					.attr("opacity", 0.8);;
 			};
 
 			const xLabel = (
