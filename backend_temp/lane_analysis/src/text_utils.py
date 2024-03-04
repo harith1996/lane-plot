@@ -4,14 +4,9 @@ import pronouncing
 import pandas as pd
 import re
 
-from lane_utils import *
+from backend_temp.lane_analysis.src.lane_utils import *
 
 CONTENT_TAGS = ["FW"]
-FUNCTION_TAGS = ["CC", "CD", "DT", "EX", "IN", "LS", "MD", "PDT", "WP$", "WP", "WDT", "UH", "TO", "RP", "PRP", "PRP$"]
-ADJECTIVE_TAGS = ["JJ", "JJR", "JJS"]
-ADVERB_TAGS = ["WRB", "RBS", "RB", "RBR"]
-NOUN_TAGS = ["NN", "NNS", "NNP", "NNPS"]
-VERB_TAGS = ["VBZ", "VBP", "VBN", "VBG", "VBD", "VB"]
 
 WORD_TAG_TYPES = ["F", "ADJ", "ADV", "N", "V", "U"]
 
@@ -27,6 +22,13 @@ LETTERS = list(string.ascii_lowercase)
 
 
 def classify_tag(tag):
+    FUNCTION_TAGS = ["CC", "CD", "DT", "EX", "IN", "LS", "MD", "PDT", "WP$", "WP", "WDT", "UH", "TO", "RP", "PRP",
+                     "PRP$"]
+    ADJECTIVE_TAGS = ["JJ", "JJR", "JJS"]
+    ADVERB_TAGS = ["WRB", "RBS", "RB", "RBR"]
+    NOUN_TAGS = ["NN", "NNS", "NNP", "NNPS"]
+    VERB_TAGS = ["VBZ", "VBP", "VBN", "VBG", "VBD", "VB"]
+
     if tag in FUNCTION_TAGS:
         return "F"
     elif tag in ADJECTIVE_TAGS:
@@ -41,7 +43,7 @@ def classify_tag(tag):
         return "U"
 
 def tag_type_distance(tag, df_wtype, delta=1, mode="avg"):
-    lane_func = delta_lane_avg if mode == "avg" else delta_lane
+    lane_func = delta_lane_avg if mode == "avg" else delta_lane_abs
 
     df_wtype = df_wtype[df_wtype["word_type"] == tag]
     df_wtype["pos"] = list(df_wtype.index)
@@ -72,7 +74,6 @@ def word_type_distances(tokens, delta=1, mode="avg", tags=WORD_TAG_TYPES):
 
 
 def simple_type_distance(df, tags=WORD_TAG_TYPES):
-
     lane_dfs = []
     for word_type in tags:
         df_wtype = df.copy()
@@ -85,8 +86,6 @@ def simple_type_distance(df, tags=WORD_TAG_TYPES):
 
         df_wtype["next"] = df_wtype["pos"].shift(-1) - df_wtype["pos"]
         df_wtype["next"] = df_wtype["next"].fillna(0)
-
-        #df_wtype = df_wtype.groupby(["last", "next"]).size().reset_index(name='count')
 
         lane_dfs.append(df_wtype)
 
@@ -151,6 +150,7 @@ def get_function_distances(dfs1, dfs2, names):
         counts.append(count)
     return pd.DataFrame({'lane_name': names, 'distance': dists, 'count': counts})
 
+
 def get_lane_letters(text):
     lanes = []
     for letter in LETTERS:
@@ -191,9 +191,8 @@ def cleanse_word(word):
     word = re.sub('’', "'", word)
     word = re.sub('œ', 'oe', word)
     return word
-    # return word.lower().replace("(", "").replace(")", "").replace("’", "'").replace(",", "").replace(" ", "").replace(":", "").replace(".", "").replace(";", "").replace("?", "").replace("!", "").replace('“',"").replace("”", "")
 
-def lane_size(size_list, thres=0, df_filename=None, element_content=None):
+def lane_size(size_list, thres=0, element_content=None):
     last_list = []
     next_list = []
 
@@ -236,11 +235,7 @@ def lane_size(size_list, thres=0, df_filename=None, element_content=None):
         df = pd.DataFrame({'last': last_list, 'next': next_list, 'size': kept_size_list, 'content': kept_element_content})
     else:
         df = pd.DataFrame({'last': last_list, 'next': next_list, 'size': kept_size_list})
-    if df_filename:
-        pass
-        #df.to_csv(df_filename)
 
-    # df = df[df['size'] > 10]
     df["count"] = 1
     df = df.groupby(["last", "next"]).agg({'size': 'mean', 'count': 'sum'}).rename(columns={'size': 'mean_size', 'count': 'count'}).reset_index()
 

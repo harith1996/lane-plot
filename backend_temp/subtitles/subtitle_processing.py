@@ -1,14 +1,10 @@
 import os
-import re
-import numpy as np
 from pytube import Playlist
-import math
 import pickle
 from tqdm import tqdm
 
-from lane_utils import *
-from plot_utils import *
-from text_utils import *
+from backend_temp.lane_analysis.src.plot_utils import *
+from backend_temp.lane_analysis.src.text_utils import *
 
 FILES = os.listdir('data/')
 #FILES = ["math_class_lUUte2o2Sn8.txt", "talk_class_Unzc731iCUY.txt"]
@@ -17,6 +13,7 @@ FILES = os.listdir('data/')
 def minmax_normalization(array, axis=0):
     mins = np.min(array, axis=axis)
     maxs = np.max(array, axis=axis)
+    print(maxs)
     array = (array - mins) / (maxs - mins)
     return np.nan_to_num(array)
 
@@ -50,7 +47,7 @@ def lane_sentiment(url, sentiment_folder, reverse=True):
             continue
 
         sent_df = pd.DataFrame(sent_list, columns=['sent'])
-        sent_df = delta_lane(sent_df, 'sent')
+        sent_df = delta_lane_abs(sent_df, 'sent')
 
         lane_chart(sent_df, color="sent", file="lanechart_"+video_id+".png", title=video_id, to_file=True)
         lane_hist(sent_df, adjust_bins=False, draw_axis_lines=True, nbins=20, x_bins=[-2., 2.], y_bins=[-2., 2.], file="lanehist_"+video_id+".png", title=video_id, to_file=True)
@@ -83,7 +80,7 @@ def playlist_fingerprinting(url, data_folder, reverse=True):
             df_fingerprints = []
             for i, df in enumerate(lane_dfs):
                 last_array = np.array(df["last"])
-                next_array = np.array(df["next"])
+                #next_array = np.array(df["next"])
 
                 percentiles = np.percentile(last_array, range(10, 100, 10))
 
@@ -109,7 +106,7 @@ if __name__ == "__main__":
 
     URL = "https://www.youtube.com/playlist?list=PLUl4u3cNGP63LmSVIVzy584-ZbjbJ-Y63"
     data_folder = "data/bio_class"
-    lane_sentiment(URL, data_folder+"_sent", reverse=False)
+    #lane_sentiment(URL, data_folder+"_sent", reverse=False)
     playlist_fingerprinting(URL, data_folder, reverse=False)
 
     exit(0)
