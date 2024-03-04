@@ -36,9 +36,7 @@ export default function LineChart(props: LineChartProps) {
 				};
 			});
 			const selectedPoints = rawSelectedPoints.map((id) => {
-				const dataItem = data.find(
-					(item: any) => item["id"] === id
-				);
+				const dataItem = data.find((item: any) => item["id"] === id);
 				return {
 					date: dataItem?.date,
 					value: dataItem?.value,
@@ -54,10 +52,10 @@ export default function LineChart(props: LineChartProps) {
 			// clear the container
 
 			//append the svg object to the body of the page
-			svg
-				.attr("width", width + margin.left + margin.right)
-				.attr("height", height + margin.top + margin.bottom)
-				.attr("transform", `translate(${margin.left}, ${margin.top})`);
+			svg.attr("width", width + margin.left + margin.right).attr(
+				"height",
+				height + margin.top + margin.bottom
+			);
 
 			// Add X axis --> it is a date format
 			const x = d3
@@ -81,7 +79,7 @@ export default function LineChart(props: LineChartProps) {
 
 			// Add Y axis
 			const y = d3
-				.scaleSymlog()
+				.scaleLinear()
 				.domain([
 					0,
 					d3.max(data, function (d) {
@@ -91,7 +89,17 @@ export default function LineChart(props: LineChartProps) {
 				.range([height, 0])
 				.clamp(true);
 			const yAxis = (g: any) => {
-				return g.call(d3.axisLeft(y));
+				const yTicks: [number, number] = d3.extent(y.domain()) as [
+					number,
+					number
+				];
+
+				return g.call(
+					d3
+						.axisLeft(y)
+						.tickValues(d3.ticks(...yTicks, height / 80))
+						.tickSizeOuter(35)
+				);
 			};
 			const yAxisElement = svg.select(".y-axis").call(yAxis);
 
@@ -157,11 +165,9 @@ export default function LineChart(props: LineChartProps) {
 				.attr("class", "circle-points")
 				.transition()
 				.attr("r", (d) => {
-					return selectedPoints.some(
-						(item) => item.id === d.id
-					)
+					return selectedPoints.some((item) => item.id === d.id)
 						? 4
-						: 1.4;
+						: 1;
 				}) // radius
 				.attr("cx", (d) => x(d.date)) // center x passing through your xScale
 				.attr("cy", (d) => y(d.value)) // center y passing through your yScale
@@ -169,16 +175,12 @@ export default function LineChart(props: LineChartProps) {
 					if (d.value === null) {
 						return "blue";
 					}
-					return selectedPoints.some(
-						(item) => item.id === d.id
-					)
+					return selectedPoints.some((item) => item.id === d.id)
 						? "red"
 						: "black";
 				})
 				.attr("opacity", (d) => {
-					return selectedPoints.some(
-						(item) => item.id === d.id
-					)
+					return selectedPoints.some((item) => item.id === d.id)
 						? 0.6
 						: 0.2;
 				})
@@ -238,16 +240,14 @@ export default function LineChart(props: LineChartProps) {
 	);
 	return (
 		<div>
-			<svg
-				ref={ref}
-			>
+			<svg ref={ref}>
 				<g className="plot-area">
 					<path className="line"></path>
 				</g>
 				<g className="x-axis" />
+				<g className="y-axis" />
 				<text className="x-label" />
 				<text className="y-label" />
-				<g className="y-axis" />
 				<g className="colorLegend" />
 			</svg>
 		</div>
