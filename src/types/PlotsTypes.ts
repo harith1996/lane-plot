@@ -38,4 +38,5 @@ export type PlotsProps = {
 		scatterplot: ScatterplotType;
 		linechart: LineChartType;
 	}[];
+	scatterplotInspectCallback: (currId: string) => void;
 };

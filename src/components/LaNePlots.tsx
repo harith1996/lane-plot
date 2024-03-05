@@ -18,6 +18,7 @@ export default function LaNePlots(props: PlotsProps) {
 								plot={activePlot.scatterplot}
 								selectionCallback={onSelectionChange}
 								selectedIds={selectedData}
+								inspectCallback={props.scatterplotInspectCallback}
 							></Scatterplot>
 							
 							<LineChart

@@ -135,4 +135,16 @@ export default class DataService {
 			response.json().then((data) => data.humanReadableName)
 		);
 	}
+
+	fetchAdjacentEvents(linearizeBy: string, sliceByField: string, sliceByValue:string, eventIdField: string, currentId: string) {
+		// fetch adjacent events from server
+		return fetch(this.host + `/get-adjacent-event-ids?linearizeBy=${linearizeBy}&sliceByField=${sliceByField}&sliceByValue=${sliceByValue}&eventIdField=${eventIdField}&currentId=${currentId}`, {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			}
+		}).then((response) =>
+			response.json()
+		);
+	}
 }

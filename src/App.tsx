@@ -10,10 +10,9 @@ import VisControls from "./components/VisControls";
 const HOST = "http://localhost:5000";
 const ds = new DataService(HOST);
 
-function getScatterplot(shownPlot: string, data: any, attList: any, isBinned: boolean) {
+function getScatterplot(shownPlot: string, data: any, attList: any, isBinned: boolean, idField: string = "rev_id") {
 	const xLabel = ["diffNext", shownPlot].join("_");
 	const yLabel = ["diffPrev", shownPlot].join("_");
-	const idField = "unique_id";
 	// const colorField = "time_till_election";
 	const colorField = "is_reverted";
 	const plotData = ds.scatterplotifyData(
@@ -111,7 +110,8 @@ function App() {
 					const attList = reqAttributes.split(",");
 					const data = dataset.data;
 					const shownPlot = dataset.shownPlot;
-					return getScatterplot(shownPlot, data, attList, plotType === "Binned");
+					const idField = "rev_id"; //@TODO: add filter option to choose event.
+					return getScatterplot(shownPlot, data, attList, plotType === "Binned", idField);
 				});
 				const linecharts = datasets.map((dataset) => {
 					const reqAttributes = dataset.reqAttributes;
@@ -143,6 +143,16 @@ function App() {
 		setFilterMap(filterMap);
 	};
 
+	const scatterplotInspectCallback = (currId: string) => {
+		const linearizeBy = filterMap.linearizeBy;
+		const sliceByField = filterMap.sliceBy;
+		const sliceByValue = filterMap.sliceByValue;
+		const eventIdField = "rev_id";
+		ds.fetchAdjacentEvents(linearizeBy, sliceByField, sliceByValue, eventIdField, currId).then((adjacentEvents) => {
+			console.log(adjacentEvents);
+		});
+	}
+
 	return (
 		<div className="App">
 			<div className="controls">
@@ -159,7 +169,7 @@ function App() {
 				></VisControls>
 			</div>
 			<div>
-				<LaNePlots activePlots={activePlots}></LaNePlots>
+				<LaNePlots activePlots={activePlots} scatterplotInspectCallback={scatterplotInspectCallback}></LaNePlots>
 			</div>
 
 			<div style={{ color: "red" }}>red = reversions</div>

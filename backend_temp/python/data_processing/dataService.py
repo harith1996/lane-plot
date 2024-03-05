@@ -18,14 +18,14 @@ class DataService:
         self.idFieldName = idFieldName
         self.df[self.idFieldName] = list(range(df.shape[0]))
         self.diffBy = None
-        self.groupBy = None
-        # split filename to get diffBy and groupBy
+        self.sliceBy = None
+        # split filename to get diffBy and sliceBy
         if fileName != None:
             fileName = fileName.split("/")[-1]
             fileName = fileName.split(".")[0]
             fileName = fileName.split(",")
             self.diffBy = fileName[0].split("=")[1]
-            self.groupBy = fileName[1].split("=")[1]
+            self.sliceBy = fileName[1].split("=")[1]
 
     def split_time(self, timeFieldName):
         df = self.df
@@ -89,11 +89,11 @@ class DataService:
                 case "linearizeBy":
                     out[filterName] = []
                 case "sliceBy":
-                    out[filterName] = [self.groupBy]
+                    out[filterName] = [self.sliceBy]
                 case "sliceByValue":
                     match filterMap["sliceBy"]:
                         case _:
-                            out[filterName] = df[self.groupBy].unique().tolist()
+                            out[filterName] = df[self.sliceBy].unique().tolist()
                 case "shownPlots":
                     out[filterName] = ["size", "timestamp", "relSize", "relDiff"]
                 case "eventType":
@@ -110,9 +110,9 @@ class DataService:
         return [nextCol, prevCol]
 
     # TODO: add values directly to dataframe
-    def get_diff_list(self, fieldName, linearOrderBy, relative=False, df=None):
+    def get_diff_list(self, fieldName, linearizeBy, relative=False, df=None):
         # sort dataframe by df
-        sortedDf = self.get_sorted_df(linearOrderBy, df)
+        sortedDf = self.get_sorted_df(linearizeBy, df)
         # get list of values for column fieldName
         filteredDf = sortedDf[[self.idFieldName, fieldName]]
         keyValuePairs = filteredDf.values.tolist()
@@ -186,3 +186,22 @@ class DataService:
             return article["article_title"].iloc[0]
         elif fieldName == "page_name":
             return fieldValue
+        
+    def get_adjacent_event_ids(self, linearizeByField, sliceByField, sliceByValue, idFieldName, currentId):
+        df = self.df
+        # group dataframe by sliceByField
+        groupedDf = df.groupby(sliceByField)
+        # get the group with sliceByValue
+        group = groupedDf.get_group(sliceByValue)
+        # sort the group by linearizeByField
+        sortedGroup = group.sort_values(by=linearizeByField, kind="stable")
+        # get the index of the currentId
+        currIndex = sortedGroup[sortedGroup[idFieldName] == int(currentId)].index[0]
+        # get the previous and next rows
+        prevRow = sortedGroup.loc[currIndex - 1]
+        nextRow = sortedGroup.loc[currIndex + 1]
+        return {
+            "prevId": str(prevRow[idFieldName]),
+            "currId": str(currentId),
+            "nextId": str(nextRow[idFieldName])
+        }

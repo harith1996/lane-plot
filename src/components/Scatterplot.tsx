@@ -8,6 +8,7 @@ type ScatterplotProps = {
 	plot: ScatterplotType;
 	selectionCallback: any;
 	selectedIds: string[];
+	inspectCallback: (currId: string) => void;
 };
 
 function getDomains(
@@ -48,6 +49,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 	const selectionCallback = props.selectionCallback;
 	const data = plot.data;
 	const selectedIds = props.selectedIds;
+	const inspectCallback = props.inspectCallback;
 	const ref = useD3(
 		(svg) => {
 			const height = 700;
@@ -83,7 +85,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 					number,
 					number
 				];
-				return g
+				g
 					.transition()
 					.attr("transform", `translate(0,${oppScale(0)})`)
 					.call(
@@ -97,7 +99,9 @@ export default function Scatterplot(props: ScatterplotProps) {
 							.tickSizeOuter(0)
 					)
 					.selectAll("*")
-					.attr("opacity", 0.8);
+					.attr("opacity", 0.8)
+					g.selectAll("text")
+					.attr("transform", `rotate(-65) translate(-25,-7)`);
 			};
 
 			const yAxis = (
@@ -122,7 +126,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 							.tickSizeOuter(0)
 					)
 					.selectAll("*")
-					.attr("opacity", 0.8);;
+					.attr("opacity", 0.8);
 			};
 
 			const xLabel = (
@@ -275,12 +279,24 @@ export default function Scatterplot(props: ScatterplotProps) {
 					tooltip.transition().duration(500).style("opacity", 0);
 				};
 
+				const onDotClick = function (event: any, d: any) {
+					//check if alt key is pressed
+					let selection = [d.id];
+					if (event.altKey) {
+						//run inspection event with prev, current and next ids
+						const previd = "pre" + d.id;
+						const nextid = "nextid" + d.id;
+						inspectCallback( d.id);
+					}
+				}
+
 				plotArea
 					.selectAll("circle")
 					.data(data)
 					.join("circle")
 					.on("mouseover", onDotMouseOver)
 					.on("mouseout", onDotMouseOut)
+					.on("click", onDotClick)
 					.transition()
 					.duration(300)
 					.attr("cx", (d) => xScale(d.x))

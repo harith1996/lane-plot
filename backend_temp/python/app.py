@@ -10,7 +10,7 @@ from data_processing.wiki_history_helper import (
 )
 from tqdm import tqdm
 
-filename = "./backend_temp/raw_data/diffBy=size,groupBy=page_name.csv"
+filename = "./backend_temp/raw_data/diffBy=size,sliceBy=page_name.csv"
 
 # check file extension
 sep = ","
@@ -51,6 +51,7 @@ ds.split_time("timestamp")
 # ds.add_time_till_event("2016-11-08 00:00:00", "time_till_election", "time_stamp")
 add_is_reverted(ds.df, "is_reverted")
 
+
 @app.route("/")
 def hello_world():
     return "Hello world"
@@ -82,13 +83,14 @@ def data_preview():
 @app.route(f"/get-data")
 def get_data():
     # extract arguments from request
-    filter_col = request.args.get("filterColumn")
-    filter_val = request.args.get("filterValue")
+    filterCol = request.args.get("filterColumn")
+    filterVal = request.args.get("filterValue")
 
     attributes = request.args.get("attributes").split(",")
-    return ds.get_eq_filtered_data(attributes, filter_col, filter_val)
+    return ds.get_eq_filtered_data(attributes, filterCol, filterVal)
 
-@app.route(f"/filters", methods = ['POST'])
+
+@app.route(f"/filters", methods=["POST"])
 def get_filter_values():
     filterMap = request.get_json()
     return ds.get_filter_values(filterMap)
@@ -97,24 +99,24 @@ def get_filter_values():
 @app.route(f"/get-diff-list")
 def get_diff_list():
     fieldName = request.args.get("fieldName")
-    linearOrderBy = request.args.get("linearOrderBy")
+    linearizeBy = request.args.get("linearizeBy")
     relative = request.args.get("relative")
-    out = ds.get_diff_list(fieldName, linearOrderBy, relative)
+    out = ds.get_diff_list(fieldName, linearizeBy, relative)
     return out
 
 
 @app.route(f"/add-diff-list")
 def add_diff_list():
     fieldName = request.args.get("fieldName").split(",")[0]
-    linearOrderBy = request.args.get("linearOrderBy")
-    groupBy = request.args.get("groupBy")
+    linearizeBy = request.args.get("linearizeBy")
+    sliceBy = request.args.get("sliceBy")
     relative = request.args.get("relative", type=bool, default=False)
     diffList = []
-    distinctValues = list(df[groupBy].unique())
+    distinctValues = list(df[sliceBy].unique())
     for val in tqdm(distinctValues, desc="Computing diffs"):
-        filteredDf = ds.get_filtered_df(groupBy, val, ds.df)
-        diffList += ds.get_diff_list(fieldName, linearOrderBy, relative, filteredDf)
-    [nextCol,prevCol] = ds.get_diff_col_names(relative)
+        filteredDf = ds.get_filtered_df(sliceBy, val, ds.df)
+        diffList += ds.get_diff_list(fieldName, linearizeBy, relative, filteredDf)
+    [nextCol, prevCol] = ds.get_diff_col_names(relative)
     prevFieldName = "_".join([prevCol, fieldName])
     prevValues = list(map(lambda x: [x["unique_id"], x[prevCol]], diffList))
     nextFieldName = "_".join([nextCol, fieldName])
@@ -122,19 +124,33 @@ def add_diff_list():
     ds.add_values_by_id(prevFieldName, prevValues)
     ds.add_values_by_id(nextFieldName, nextValues)
     print(ds.df)
-    ds.df.to_csv("diffBy=" + fieldName + ",groupBy=" + groupBy + ".csv", sep=",")
+    ds.df.to_csv("diffBy=" + fieldName + ",sliceBy=" + sliceBy + ".csv", sep=",")
     return jsonify(diffList)
+
 
 @app.route(f"/get-human-readable-name")
 def get_human_readable_name():
     fieldName = request.args.get("fieldName")
     fieldValue = request.args.get("fieldValue")
-    res  = {
+    res = {
         "fieldName": fieldName,
         "fieldValue": fieldValue,
-        "humanReadableName": ds.get_human_readable_name(fieldName, fieldValue)
+        "humanReadableName": ds.get_human_readable_name(fieldName, fieldValue),
     }
     return jsonify(res)
+
+
+@app.route(f"/get-adjacent-event-ids")
+def get_adjacent_event_ids():
+    linearizeBy = request.args.get("linearizeBy")
+    sliceByField = request.args.get("sliceByField")
+    sliceByValue = request.args.get("sliceByValue")
+    eventIdField = request.args.get("eventIdField")
+    currentId = request.args.get("currentId")
+    return ds.get_adjacent_event_ids(
+        linearizeBy, sliceByField, sliceByValue, eventIdField, currentId
+    )
+
 
 if __name__ == "__main__":
     app.run(debug=False)
