@@ -165,7 +165,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 			// Append the dots or bins.
 			plotArea.selectAll("*").remove();
 			if (plot.isBinned) {
-				const radius = 2;
+				const radius = 3;
 				const hexbin = d3Hexbin
 					.hexbin()
 					// @ts-ignore
