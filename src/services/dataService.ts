@@ -45,7 +45,7 @@ export default class DataService {
 		extraColumns: string[] = []
 	) {
 		const xLabel = ["diffNext", shownPlot].join("_");
-		const yLabel = ["diffPrev", shownPlot].join("_");
+		const yLabel = ["diffLast", shownPlot].join("_");
 		const reqAttributes = this.defaultFetchAttributes
 			.concat([
 				xLabel,
