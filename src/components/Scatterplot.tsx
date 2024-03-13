@@ -167,8 +167,10 @@ export default function Scatterplot(props: ScatterplotProps) {
 			const plotArea = svg.select(".plot-area");
 
 			// Append the dots or bins.
-			plotArea.selectAll("*").remove();
+			
 			if (plot.isBinned) {
+				
+				plotArea.selectAll("circle").remove();
 				const radius = 3;
 				const hexbin = d3Hexbin
 					.hexbin()
@@ -244,6 +246,8 @@ export default function Scatterplot(props: ScatterplotProps) {
 						})`
 					);
 			} else {
+				
+				plotArea.selectAll("path").remove();
 				const minColorDomain = d3.min(data, (d: any) => d.colorField);
 				const maxColorDomain = d3.max(data, (d: any) => d.colorField);
 				const colorScale = d3
