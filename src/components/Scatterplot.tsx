@@ -196,9 +196,12 @@ export default function Scatterplot(props: ScatterplotProps) {
 					// @ts-ignore
 					b.isSelected = filteredArray.length > 0;
 				});
+				// const totalEvents = data.length;
+				const largestBinLength = Math.max(...bins.map((b) => b.length));
 				const colorScale = d3
 					.scaleSequentialSymlog(d3.interpolateBlues)
-					.domain([0, Math.max(...bins.map((b) => b.length))]);
+					.domain([0, largestBinLength]);
+					// .domain([0, 1]);
 
 				// const onBinSelect = function (event: any, d: any) {
 				// 	let selection = d.map((d: any) => d.id);
@@ -224,7 +227,10 @@ export default function Scatterplot(props: ScatterplotProps) {
 					.transition()
 					.duration(300)
 					.attr("transform", (d) => `translate(${d.x},${d.y})`)
-					.attr("fill", (d) => colorScale(d.length))
+					.attr("fill", (d) => {
+						// return colorScale(d.length/largestBinLength)
+						return colorScale(d.length);
+					})
 					.attr("opacity", (d: any) => {
 						return d.isSelected ? 1 : 1;
 					})
