@@ -12,7 +12,7 @@ const ds = new DataService(HOST);
 
 function getScatterplot(shownPlot: string, data: any, attList: any, isBinned: boolean, idField: string = "rev_id") {
 	const xLabel = ["diffNext", shownPlot].join("_");
-	const yLabel = ["diffPrev", shownPlot].join("_");
+	const yLabel = ["diffLast", shownPlot].join("_");
 	// const colorField = "time_till_election";
 	const colorField = "is_reverted";
 	const plotData = ds.scatterplotifyData(
@@ -149,7 +149,8 @@ function App() {
 		const sliceByValue = filterMap.sliceByValue;
 		const eventIdField = "rev_id";
 		ds.fetchAdjacentEvents(linearizeBy, sliceByField, sliceByValue, eventIdField, currId).then((adjacentEvents) => {
-			console.log(adjacentEvents);
+			// open diff url in new tab
+			window.open(`https://en.wikipedia.org/w/index.php?diff=${adjacentEvents.currId}&oldid=${adjacentEvents.nextId}`, "_blank");
 		});
 	}
 

@@ -104,9 +104,9 @@ class DataService:
 
     def get_diff_col_names(self, relative=False):
 
-        [nextCol, prevCol] = ["diffNext", "diffPrev"]
+        [nextCol, prevCol] = ["diffNext", "diffLast"]
         if relative:
-            [nextCol, prevCol] = ["relDiffNext", "relDiffPrev"]
+            [nextCol, prevCol] = ["relDiffNext", "reldiffLast"]
         return [nextCol, prevCol]
 
     # TODO: add values directly to dataframe
