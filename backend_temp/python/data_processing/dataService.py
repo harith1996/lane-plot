@@ -21,11 +21,14 @@ class DataService:
         self.sliceBy = None
         # split filename to get diffBy and sliceBy
         if fileName != None:
-            fileName = fileName.split("/")[-1]
-            fileName = fileName.split(".")[0]
-            fileName = fileName.split(",")
-            self.diffBy = fileName[0].split("=")[1]
-            self.sliceBy = fileName[1].split("=")[1]
+            self.parse_filename(fileName)
+    
+    def parse_filename(self, fileName: str):
+        fileName = fileName.split("/")[-1]
+        fileName = fileName.split(".")[0]
+        fileName = fileName.split(",")
+        self.diffBy = fileName[0].split("=")[1]
+        self.sliceBy = fileName[1].split("=")[1]
 
     def split_time(self, timeFieldName):
         df = self.df
