@@ -276,7 +276,8 @@ export default function Scatterplot(props: ScatterplotProps) {
 
 					//hide tooltip
 					const tooltip = d3.select(".tooltip");
-					tooltip.transition().duration(500).style("opacity", 0);
+					tooltip.transition().duration(500).style("opacity", 0)
+					.style("display", "none");
 				};
 
 				const onDotClick = function (event: any, d: any) {
