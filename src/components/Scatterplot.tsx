@@ -63,14 +63,14 @@ export default function Scatterplot(props: ScatterplotProps) {
 			);
 
 			const xScale = d3
-				.scaleSymlog()
+				.scaleSymlog().constant(7)
 				// .domain(xDomain)
 				.domain([-20000,20000])
 				.rangeRound([margin.left, width - margin.right])
 				.clamp(true);
 
 			const yScale = d3
-				.scaleSymlog()
+				.scaleSymlog().constant(7)
 				// .domain(yDomain.reverse())
 				.domain([20000,-20000])
 				.rangeRound([margin.top, height - margin.bottom])
