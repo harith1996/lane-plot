@@ -49,14 +49,15 @@ def line_chart(series, file=" ", title="", to_file=False):
     plot_config(file, title, to_file)
 
 
-def lane_chart(df, file="", title="", last="last", next="next", color=None, to_file=False, size=None, min_lane=MIN_LANE_DIST, max_lane=MAX_LANE_DIST, log_scale=False):
-    if size:
-        size = 25*df[size].apply(math.log)
-    else:
-        size = 8
+def lane_chart(df, file="", title="", last="last", next="next", color=None, to_file=False, size=8, min_lane=MIN_LANE_DIST, max_lane=MAX_LANE_DIST, log_scale=False,
+               cmap="viridis"):
+    # if size:
+    #     size = 25*df[size].apply(math.log)
+    # else:
+    #     size = 8
 
     if color:
-        plt.scatter(df[last], df[next], c=df[color], cmap="viridis", s=size, alpha=0.7)
+        plt.scatter(df[last], df[next], c=df[color], cmap=cmap, s=size, alpha=0.7)
     else:
         plt.scatter(df[last], df[next], s=size)
 
@@ -64,12 +65,12 @@ def lane_chart(df, file="", title="", last="last", next="next", color=None, to_f
     plt.ylabel("next")
     plt.colorbar()
 
-    plt.ylim([min_lane, max_lane])
-    plt.xlim([min_lane, max_lane])
-
     if log_scale:
         plt.yscale('log')
         plt.xscale('log')
+    else:
+        plt.ylim([min_lane, max_lane])
+        plt.xlim([min_lane, max_lane])
 
     plot_config(file=file, title=title, to_file=to_file)
 

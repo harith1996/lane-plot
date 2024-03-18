@@ -1,4 +1,6 @@
-def delta_lane_abs(df, key="timestamp", delta=1):
+import pandas as pd
+
+def delta_lane_abs(df, key="timestamp", delta=1, time_metric=False):
     """
     Computes the absolute delta lane last and next values from a given sequence
     :param df: A pandas DataFrame containing the sequence
@@ -6,8 +8,12 @@ def delta_lane_abs(df, key="timestamp", delta=1):
     :param delta: The delay introduced to calculate the values
     :return: The df parameter with the columns "last" and "next" filled with the corresponding LaNe values
     """
+    df = df.reset_index(drop=True)
 
-    lane_last = [0]
+    if time_metric:
+        lane_last = [pd.Timedelta(seconds=0)]
+    else:
+        lane_last = [0]
 
     for i in range(1, delta):
         lane_last.append(df[key][i]-df[key][0])
