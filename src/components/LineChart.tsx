@@ -46,7 +46,7 @@ export default function LineChart(props: LineChartProps) {
 
 			// set the dimensions and margins of the graph
 			const margin = { top: 10, right: 30, bottom: 30, left: 60 },
-				width = 700 - margin.left - margin.right,
+				width = 500 - margin.left - margin.right,
 				height = 300 - margin.top - margin.bottom;
 
 			// clear the container
@@ -68,9 +68,11 @@ export default function LineChart(props: LineChartProps) {
 				.range([0, width])
 				.clamp(true);
 			const xAxis = (g: any) => {
-				return g
+				g
 					.attr("transform", `translate(0,${height})`)
 					.call(d3.axisBottom(x));
+				g.selectAll(".tick text").attr("transform", "translate(0,13) rotate(-45)");
+				return g;	
 			};
 			const xAxisElement = svg
 				.select(".x-axis")
