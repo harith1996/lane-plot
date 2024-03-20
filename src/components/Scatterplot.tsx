@@ -11,6 +11,8 @@ type ScatterplotProps = {
 	inspectCallback: (currId: string) => void;
 };
 
+const TICK_FONT_SIZE = 13;
+
 function getDomains(
 	data: any[],
 	xDomain: [number, number] | undefined,
@@ -65,14 +67,14 @@ export default function Scatterplot(props: ScatterplotProps) {
 			const xScale = d3
 				.scaleSymlog().constant(7)
 				// .domain(xDomain)
-				.domain([-20000,20000])
+				.domain([-2000,2000])
 				.rangeRound([margin.left, width - margin.right])
 				.clamp(true);
 
 			const yScale = d3
 				.scaleSymlog().constant(7)
 				// .domain(yDomain.reverse())
-				.domain([20000,-20000])
+				.domain([2000,-2000])
 				.rangeRound([margin.top, height - margin.bottom])
 				.clamp(true);
 
@@ -98,10 +100,11 @@ export default function Scatterplot(props: ScatterplotProps) {
 							)
 							.tickSizeOuter(0)
 					)
-					.selectAll("*")
-					.attr("opacity", 0.8)
+					.selectAll("path")
+					.attr("opacity", 0.3)
 					g.selectAll("text")
-					.attr("transform", `rotate(-65) translate(-25,-7)`);
+					.attr("transform", `rotate(-65) translate(-34,-9)`)
+					.style("font-size", TICK_FONT_SIZE);
 			};
 
 			const yAxis = (
@@ -125,8 +128,10 @@ export default function Scatterplot(props: ScatterplotProps) {
 							)
 							.tickSizeOuter(0)
 					)
-					.selectAll("*")
-					.attr("opacity", 0.8);
+					.selectAll("path")
+					.attr("opacity", 0.3);
+					g.selectAll("text")
+					.style("font-size", TICK_FONT_SIZE);
 			};
 
 			const xLabel = (
@@ -171,7 +176,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 			if (plot.isBinned) {
 				
 				plotArea.selectAll("circle").remove();
-				const radius = 3;
+				const radius = 4;
 				const hexbin = d3Hexbin
 					.hexbin()
 					// @ts-ignore
@@ -241,7 +246,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 						return d.isSelected ? 2 : 1;
 					});
 				const legend = Legend(colorScale, {
-					title: "Time till election",
+					title: "Number of points",
 				});
 				svg.select(".colorLegend")
 					.html(legend?.innerHTML as string)
@@ -270,8 +275,6 @@ export default function Scatterplot(props: ScatterplotProps) {
 					const y = event.pageY + offset;
 					const tooltip = d3.select(".tooltip");
 					tooltip
-						.transition()
-						.duration(200)
 						.style("opacity", 0.9)
 						.style("display", "block")
 						.style("left", x + "px")
