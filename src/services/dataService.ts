@@ -116,7 +116,7 @@ export default class DataService {
 		let out = [];
 		for (let i = 0; i < data.length; i++) {
 			out.push({
-				date: data[i][xIndex],
+				xAxis: data[i][xIndex],
 				value: data[i][yIndex],
 				id: data[i][idIndex],
 			});

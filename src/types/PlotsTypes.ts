@@ -21,14 +21,20 @@ export type ScatterplotDataPoint = {
 	id: string;
 };
 
+type LineChartDataType = {
+	xAxis: string,
+	yAxis: string
+}
+
 export type LineChartType = {
+	dataTypes: LineChartDataType;
 	labels: PlotLabels;
 	options: PlotOptions;
 	data: LineChartDataPoint[];
 };
 
 export type LineChartDataPoint = {
-	date: string;
+	xAxis: string;
 	value: number;
 	id: string;
 };

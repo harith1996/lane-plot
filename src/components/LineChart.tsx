@@ -4,11 +4,20 @@ import { useD3 } from "../hooks/useD3";
 import { LineChartType } from "../types/PlotsTypes";
 import { isNull } from "underscore";
 
+
+
 type LineChartProps = {
 	plot: LineChartType;
 	selectionCallback: any;
 	selectedIds: string[];
 };
+
+function parseAxis(data : any, type: string){
+	switch(type) {
+		case 'date': return parseDateTime(data);
+		default : return data
+	}
+}
 
 function parseDateTime(dateTime: string) {
 	const date = new Date(dateTime).toISOString();
@@ -16,21 +25,22 @@ function parseDateTime(dateTime: string) {
 }
 
 export default function LineChart(props: LineChartProps) {
-	const columns = ["date", "value", "id"];
+	const columns = ["xAxis", "value", "id"];
 	const rawData = props.plot.data;
 	const rawSelectedPoints = props.selectedIds;
 	const selectionCallback = props.selectionCallback;
 	const plot = props.plot;
+	const xAxisDType = plot.dataTypes.xAxis;
 	const ref = useD3(
 		(svg) => {
 			//format the data
-			const timeIdx = columns.indexOf("date");
+			const xAxisIdx = columns.indexOf("xAxis");
 			const valueIdx = columns.indexOf("value");
 			const uniqueIdIdx = columns.indexOf("id");
 			const data = rawData.map((d) => {
 				//  28/03/2011 15:10
 				return {
-					date: parseDateTime(d.date)!,
+					xAxis: parseAxis(d.xAxis, xAxisDType)!,
 					value: d.value,
 					id: d.id,
 				};
@@ -38,7 +48,7 @@ export default function LineChart(props: LineChartProps) {
 			const selectedPoints = rawSelectedPoints.map((id) => {
 				const dataItem = data.find((item: any) => item["id"] === id);
 				return {
-					date: dataItem?.date,
+					xAxis: dataItem?.xAxis,
 					value: dataItem?.value,
 					id: dataItem?.id,
 				};
@@ -58,15 +68,33 @@ export default function LineChart(props: LineChartProps) {
 			);
 
 			// Add X axis --> it is a date format
-			const x = d3
+			let x : any = null;
+			if(xAxisDType == 'date'){
+				
+				x = d3
 				.scaleTime()
 				.domain(
 					d3.extent(data, function (d) {
-						return d.date as Date;
+						return d.xAxis as Date;
 					}) as [Date, Date]
 				)
 				.range([0, width])
 				.clamp(true);
+			}
+			else {
+				const ex = d3.extent(data, function (d) {
+					return d.xAxis;
+				}) as [number, number];
+				const exRev = ex.reverse();
+				x = d3
+				.scaleLinear()
+				.domain(
+					exRev
+				)
+				.range([0, width])
+				.clamp(true);
+			}
+			
 			const xAxis = (g: any) => {
 				g
 					.attr("transform", `translate(0,${height})`)
@@ -129,7 +157,7 @@ export default function LineChart(props: LineChartProps) {
 				return d3
 					.line()
 					.x(function (d: any) {
-						return x(d.date);
+						return x(d.xAxis);
 					})
 					.y(function (d: any) {
 						return y(d.value);
@@ -171,7 +199,7 @@ export default function LineChart(props: LineChartProps) {
 						? 4
 						: 1;
 				}) // radius
-				.attr("cx", (d) => x(d.date)) // center x passing through your xScale
+				.attr("cx", (d) => x(d.xAxis)) // center x passing through your xScale
 				.attr("cy", (d) => y(d.value)) // center y passing through your yScale
 				.attr("fill", (d) => {
 					if (d.value === null) {
@@ -184,7 +212,7 @@ export default function LineChart(props: LineChartProps) {
 				.attr("opacity", (d) => {
 					return selectedPoints.some((item) => item.id === d.id)
 						? 0.6
-						: 0.2;
+						: 1;
 				})
 				.attr("stroke", "black");
 
@@ -214,17 +242,27 @@ export default function LineChart(props: LineChartProps) {
 				svg.selectAll(".circle-points")
 					.transition()
 					.duration(1000)
-					.attr("cx", (d: any) => x(d.date)) // center x passing through your xScale
+					.attr("cx", (d: any) => x(d.xAxis)) // center x passing through your xScale
 					.attr("cy", (d: any) => y(d.value)); // center y passing through your yScale
 			}
 
 			// If user double click, reinitialize the chart
 			svg.on("dblclick", function () {
-				x.domain(
-					d3.extent(data, function (d) {
-						return d.date;
-					}) as [Date, Date]
-				);
+				if(xAxisDType == 'time'){
+					x.domain(
+						d3.extent(data, function (d) {
+							return d.xAxis;
+						}) as [Date, Date]
+					);
+				}
+				else {
+					x.domain(
+						d3.extent(data, function (d) {
+							return d.xAxis;
+						}).reverse() as [number, number]
+					);
+				}
+				
 				xAxisElement.transition().call(xAxis);
 				line.select(".line")
 					.transition()
@@ -234,7 +272,7 @@ export default function LineChart(props: LineChartProps) {
 				svg.selectAll(".circle-points")
 					.transition()
 					.duration(1000)
-					.attr("cx", (d: any) => x(d.date)) // center x passing through your xScale
+					.attr("cx", (d: any) => x(d.xAxis)) // center x passing through your xScale
 					.attr("cy", (d: any) => y(d.value)); // center y passing through your yScale
 			});
 		},

@@ -43,7 +43,7 @@ function getLineChart(
 	attList: any,
 	linearizeBy: string
 ) {
-	const xLabel = linearizeBy;
+	const xLabel = "unique_id";
 	const yLabel = shownPlot;
 	const idField = "unique_id";
 	const plotData = ds.linechartifyData(
@@ -54,6 +54,10 @@ function getLineChart(
 		attList
 	);
 	return {
+		dataTypes: {
+			xAxis: 'quantitative',
+			yAxis: 'quantitative'
+		},
 		labels: {
 			xLabel: xLabel,
 			yLabel: yLabel,
