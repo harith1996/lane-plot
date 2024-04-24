@@ -4,18 +4,18 @@ import { useD3 } from "../hooks/useD3";
 import { LineChartType } from "../types/PlotsTypes";
 import { isNull } from "underscore";
 
-
-
 type LineChartProps = {
 	plot: LineChartType;
 	selectionCallback: any;
 	selectedIds: string[];
 };
 
-function parseAxis(data : any, type: string){
-	switch(type) {
-		case 'date': return parseDateTime(data);
-		default : return data
+function parseAxis(data: any, type: string) {
+	switch (type) {
+		case "date":
+			return parseDateTime(data);
+		default:
+			return data;
 	}
 }
 
@@ -56,8 +56,8 @@ export default function LineChart(props: LineChartProps) {
 
 			// set the dimensions and margins of the graph
 			const margin = { top: 10, right: 30, bottom: 30, left: 60 },
-				width = 500 - margin.left - margin.right,
-				height = 300 - margin.top - margin.bottom;
+				width = 500,
+				height = 300;
 
 			// clear the container
 
@@ -67,44 +67,48 @@ export default function LineChart(props: LineChartProps) {
 				height + margin.top + margin.bottom
 			);
 
+			const plotArea = svg.select(".container").attr(
+				"transform",
+				`translate(${margin.left}, 0)`
+			);
+
 			// Add X axis --> it is a date format
-			let x : any = null;
-			if(xAxisDType == 'date'){
-				
+			let x: any = null;
+			if (xAxisDType == "date") {
 				x = d3
-				.scaleTime()
-				.domain(
-					d3.extent(data, function (d) {
-						return d.xAxis as Date;
-					}) as [Date, Date]
-				)
-				.range([0, width])
-				.clamp(true);
-			}
-			else {
+					.scaleTime()
+					.domain(
+						d3.extent(data, function (d) {
+							return d.xAxis as Date;
+						}) as [Date, Date]
+					)
+					.range([0, width])
+					.clamp(true);
+			} else {
 				const ex = d3.extent(data, function (d) {
 					return d.xAxis;
 				}) as [number, number];
 				const exRev = ex.reverse();
 				x = d3
-				.scaleLinear()
-				.domain(
-					exRev
-				)
-				.range([0, width])
-				.clamp(true);
+					.scaleLinear()
+					.domain(exRev)
+					.range([0, width])
+					.clamp(true);
 			}
-			
+
 			const xAxis = (g: any) => {
-				g
-					.attr("transform", `translate(0,${height})`)
-					.call(d3.axisBottom(x));
-				g.selectAll(".tick text").attr("transform", "translate(0,13) rotate(-45)");
-				return g;	
+				g.attr("transform", `translate(0,${height})`).call(
+					d3.axisBottom(x)
+				);
+				g.selectAll(".tick text").attr(
+					"transform",
+					"translate(0,13) rotate(-45)"
+				);
+				return g;
 			};
-			const xAxisElement = svg
+			const xAxisElement = plotArea
 				.select(".x-axis")
-				.attr("transform", `translate(0, ${height})`)
+				.attr("transform", `translate(${margin.left}, ${height})`)
 				.call(xAxis);
 
 			// Add Y axis
@@ -128,10 +132,10 @@ export default function LineChart(props: LineChartProps) {
 					d3
 						.axisLeft(y)
 						.tickValues(d3.ticks(...yTicks, height / 80))
-						.tickSizeOuter(35)
 				);
 			};
-			const yAxisElement = svg.select(".y-axis").call(yAxis);
+
+			const yAxisElement = plotArea.select(".y-axis").call(yAxis);
 
 			// Add a clipPath: everything out of this area won't be drawn.
 			const clip = svg
@@ -189,7 +193,7 @@ export default function LineChart(props: LineChartProps) {
 				idleTimeout = null;
 			}
 
-			svg.selectAll(".circle-points")
+			plotArea.selectAll(".circle-points")
 				.data(data)
 				.join("circle") // enter append
 				.attr("class", "circle-points")
@@ -239,7 +243,7 @@ export default function LineChart(props: LineChartProps) {
 					.attr("d", getLineGenerator() as any);
 
 				// update the points
-				svg.selectAll(".circle-points")
+				plotArea.selectAll(".circle-points")
 					.transition()
 					.duration(1000)
 					.attr("cx", (d: any) => x(d.xAxis)) // center x passing through your xScale
@@ -248,28 +252,29 @@ export default function LineChart(props: LineChartProps) {
 
 			// If user double click, reinitialize the chart
 			svg.on("dblclick", function () {
-				if(xAxisDType == 'time'){
+				if (xAxisDType == "time") {
 					x.domain(
 						d3.extent(data, function (d) {
 							return d.xAxis;
 						}) as [Date, Date]
 					);
-				}
-				else {
+				} else {
 					x.domain(
-						d3.extent(data, function (d) {
-							return d.xAxis;
-						}).reverse() as [number, number]
+						d3
+							.extent(data, function (d) {
+								return d.xAxis;
+							})
+							.reverse() as [number, number]
 					);
 				}
-				
+
 				xAxisElement.transition().call(xAxis);
 				line.select(".line")
 					.transition()
 					.duration(900)
 					.attr("d", getLineGenerator() as any);
 				// update the points
-				svg.selectAll(".circle-points")
+				plotArea.selectAll(".circle-points")
 					.transition()
 					.duration(1000)
 					.attr("cx", (d: any) => x(d.xAxis)) // center x passing through your xScale
@@ -281,14 +286,16 @@ export default function LineChart(props: LineChartProps) {
 	return (
 		<div>
 			<svg ref={ref}>
-				<g className="plot-area">
-					<path className="line"></path>
+				<g className="container">
+					<g className="plot-area">
+						<path className="line"></path>
+					</g>
+					<g className="x-axis" />
+					<g className="y-axis" />
+					<text className="x-label" />
+					<text className="y-label" />
+					<g className="colorLegend" />
 				</g>
-				<g className="x-axis" />
-				<g className="y-axis" />
-				<text className="x-label" />
-				<text className="y-label" />
-				<g className="colorLegend" />
 			</svg>
 		</div>
 	);

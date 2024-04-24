@@ -104,7 +104,7 @@ function App() {
 						"comment",
 						"rev_id",
 						"is_reverted",
-						"tags"
+						// "tags"
 					]
 				);
 			});

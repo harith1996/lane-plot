@@ -10,7 +10,7 @@ from data_processing.wiki_history_helper import (
 )
 from tqdm import tqdm
 
-filename = "./backend_temp/raw_data/diffBy=size,sliceBy=page_name.csv"
+filename = "./backend_temp/raw_data/diffBy=size,sliceBy=article_id.csv"
 
 # check file extension
 sep = ","
