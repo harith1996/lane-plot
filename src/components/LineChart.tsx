@@ -57,7 +57,7 @@ export default function LineChart(props: LineChartProps) {
 			// set the dimensions and margins of the graph
 			const margin = { top: 10, right: 30, bottom: 30, left: 60 },
 				width = 500,
-				height = 300;
+				height = 500;
 
 			// clear the container
 
