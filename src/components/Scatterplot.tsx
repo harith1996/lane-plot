@@ -105,6 +105,10 @@ export default function Scatterplot(props: ScatterplotProps) {
 					g.selectAll("text")
 					.attr("transform", `rotate(-65) translate(-34,-9)`)
 					.style("font-size", TICK_FONT_SIZE);
+					g.selectAll("text")
+					.filter((d:any)=>{
+						return d===0
+					}).remove();
 			};
 
 			const yAxis = (
@@ -176,7 +180,7 @@ export default function Scatterplot(props: ScatterplotProps) {
 			if (plot.isBinned) {
 				
 				plotArea.selectAll("circle").remove();
-				const radius = 4;
+				const radius = 3;
 				const hexbin = d3Hexbin
 					.hexbin()
 					// @ts-ignore

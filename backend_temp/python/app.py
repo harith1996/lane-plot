@@ -49,7 +49,7 @@ CORS(app)
 ds = DataService(df, {"timestamp": "dateTime"}, fileName=filename)
 ds.split_time("timestamp")
 # ds.add_time_till_event("2016-11-08 00:00:00", "time_till_election", "time_stamp")
-add_is_reverted(ds.df, "is_reverted")
+# add_is_reverted(ds.df, "is_reverted")
 
 
 @app.route("/")

@@ -96,7 +96,8 @@ class DataService:
                 case "sliceByValue":
                     match filterMap["sliceBy"]:
                         case _:
-                            out[filterName] = df[self.sliceBy].unique().tolist()
+                            slices = df.groupby(self.sliceBy).size()
+                            out[filterName] = slices.sort_values(ascending=False).keys().tolist()
                 case "shownPlots":
                     out[filterName] = ["size", "timestamp", "relSize", "relDiff"]
                 case "eventType":
