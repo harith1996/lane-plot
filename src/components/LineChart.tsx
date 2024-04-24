@@ -67,10 +67,9 @@ export default function LineChart(props: LineChartProps) {
 				height + margin.top + margin.bottom
 			);
 
-			const plotArea = svg.select(".container").attr(
-				"transform",
-				`translate(${margin.left}, 0)`
-			);
+			const plotArea = svg
+				.select(".container")
+				.attr("transform", `translate(${margin.left}, 0)`);
 
 			// Add X axis --> it is a date format
 			let x: any = null;
@@ -97,9 +96,18 @@ export default function LineChart(props: LineChartProps) {
 			}
 
 			const xAxis = (g: any) => {
-				g.attr("transform", `translate(0,${height})`).call(
-					d3.axisBottom(x)
-				);
+				g.attr("transform", `translate(0,${height})`);
+				if (xAxisDType == "quantitative") {
+					const max = x.domain()[0];
+					g.call(
+						d3.axisBottom(x).tickFormat((d: any, index: number) => {
+							return "" + Math.abs((max - d + 1) as number);
+						})
+					);
+				} else {
+					g.call(d3.axisBottom(x));
+				}
+
 				g.selectAll(".tick text").attr(
 					"transform",
 					"translate(0,13) rotate(-45)"
@@ -129,9 +137,7 @@ export default function LineChart(props: LineChartProps) {
 				];
 
 				return g.call(
-					d3
-						.axisLeft(y)
-						.tickValues(d3.ticks(...yTicks, height / 80))
+					d3.axisLeft(y).tickValues(d3.ticks(...yTicks, height / 80))
 				);
 			};
 
@@ -193,7 +199,8 @@ export default function LineChart(props: LineChartProps) {
 				idleTimeout = null;
 			}
 
-			plotArea.selectAll(".circle-points")
+			plotArea
+				.selectAll(".circle-points")
 				.data(data)
 				.join("circle") // enter append
 				.attr("class", "circle-points")
@@ -243,7 +250,8 @@ export default function LineChart(props: LineChartProps) {
 					.attr("d", getLineGenerator() as any);
 
 				// update the points
-				plotArea.selectAll(".circle-points")
+				plotArea
+					.selectAll(".circle-points")
 					.transition()
 					.duration(1000)
 					.attr("cx", (d: any) => x(d.xAxis)) // center x passing through your xScale
@@ -274,7 +282,8 @@ export default function LineChart(props: LineChartProps) {
 					.duration(900)
 					.attr("d", getLineGenerator() as any);
 				// update the points
-				plotArea.selectAll(".circle-points")
+				plotArea
+					.selectAll(".circle-points")
 					.transition()
 					.duration(1000)
 					.attr("cx", (d: any) => x(d.xAxis)) // center x passing through your xScale
