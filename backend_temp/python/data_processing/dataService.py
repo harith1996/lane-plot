@@ -187,7 +187,7 @@ class DataService:
         if fieldName == "article_id":
             # fetch the article from data
             article = df.loc[df["article_id"] == int(fieldValue)]
-            return article["article_title"].iloc[0]
+            return article["page_name"].iloc[0]
         elif fieldName == "page_name":
             return fieldValue
         
