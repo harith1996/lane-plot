@@ -8,6 +8,9 @@ def delta_lane_abs(df, key="timestamp", delta=1, time_metric=False):
     :param delta: The delay introduced to calculate the values
     :return: The df parameter with the columns "last" and "next" filled with the corresponding LaNe values
     """
+    if len(df) == 0:
+        return df
+
     df = df.reset_index(drop=True)
 
     if time_metric:
@@ -21,7 +24,7 @@ def delta_lane_abs(df, key="timestamp", delta=1, time_metric=False):
     for i in range(delta, len(df)):
         lane_last.append(df[key][i]-df[key][i-delta])
 
-    lane_next = lane_last.copy()
+    lane_next = [-val for val in lane_last]
     lane_next = lane_next[delta:]
 
     for i in range(len(df)-delta, len(df)):

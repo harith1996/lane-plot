@@ -75,7 +75,7 @@ def lane_chart(df, file="", title="", last="last", next="next", color=None, to_f
     plot_config(file=file, title=title, to_file=to_file)
 
 
-def lane_hist(df, file="", title="", to_file=False, nbins=50, scale=None, adjust_bins=True, draw_axis_lines=False, x_bins=None, y_bins=None):
+def lane_hist(df, file="", title="", to_file=False, nbins=50, scale=None, adjust_bins=True, draw_axis_lines=False, x_bins=None, y_bins=None, min_lane=None, max_lane=None):
     x = df["last"]
     y = df["next"]
 
@@ -84,17 +84,30 @@ def lane_hist(df, file="", title="", to_file=False, nbins=50, scale=None, adjust
         y_bins = [y_bins[0] + i * (y_bins[1] - y_bins[0]) / nbins for i in range(nbins)]+[y_bins[1]]
     else:
         # Adjust nbins if few space
+        if min_lane:
+            x_min = min_lane
+            y_min = min_lane
+        else:
+            x_min = x.min()
+            y_min = y.min()
+        if max_lane:
+            x_max = max_lane
+            y_max = max_lane
+        else:
+            x_max = x.max()
+            y_max = y.max()
+
         if adjust_bins:
-            nbins = int(min(nbins, x.max(), y.max()))
+            nbins = int(min(nbins, x_max, y_max))
 
         if scale == "log":
-            x_bins = [0]+np.logspace(0, np.log10(x.max()), nbins-1)
-            y_bins = [0]+np.logspace(0, np.log10(y.max()), nbins-1)
+            x_bins = [0]+np.logspace(0, np.log10(x_max), nbins-1)
+            y_bins = [0]+np.logspace(0, np.log10(y_max), nbins-1)
             plt.xscale('log')
             plt.yscale('log')
         else:
-            x_bins = [x.min()+i*(x.max()-x.min())/nbins for i in range(nbins)]
-            y_bins = [y.min()+i*(y.max()-y.min())/nbins for i in range(nbins)]
+            x_bins = [x_min+i*(x_max-x_min)/nbins for i in range(nbins)]
+            y_bins = [y_min+i*(y_max-y_min)/nbins for i in range(nbins)]
 
     plt.hist2d(x, y, [x_bins, y_bins], cmin=1, cmap="viridis")
 
@@ -102,6 +115,10 @@ def lane_hist(df, file="", title="", to_file=False, nbins=50, scale=None, adjust
     plt.ylabel("next")
 
     plt.colorbar()
+
+    if min_lane and max_lane:
+        plt.ylim([min_lane, max_lane])
+        plt.xlim([min_lane, max_lane])
 
     if draw_axis_lines:
         plt.axhline(0, color="black")
