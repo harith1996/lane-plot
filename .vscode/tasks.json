@@ -6,7 +6,7 @@
 			"type": "shell",
 			"isBackground": true,
 			"command": "bokeh",
-			"args": ["serve", "--show", "bokeh_example.py"],
+			"args": ["serve", "--show", "formula_1_bokeh.py"],
 			"options": {
 				"env": {
 					"BOKEH_VS_DEBUG": "true"

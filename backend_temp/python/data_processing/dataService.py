@@ -1,8 +1,8 @@
-import modin.pandas as pd
+import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
-from data_processing.diffComputer import DiffComputer
+from diffComputer import DiffComputer
 
 
 class DataService:
@@ -113,19 +113,20 @@ class DataService:
             [nextCol, prevCol] = ["relDiffNext", "reldiffLast"]
         return [nextCol, prevCol]
 
+    def handle_null_values(self, df:pd.DataFrame, column:str):
+        last_non_null = None
+        for index, x in df.iterrows():
+            if(x[column] == None or np.isnan(x[column])):
+                df.loc[index, column] = last_non_null
+            else:
+                last_non_null = x[column]
+        return df
+
     # TODO: add values directly to dataframe
-    def get_diff_list(self, fieldName, linearizeBy, relative=False, df=None):
+    def add_diff_list(self, fieldName, linearizeBy, relative=False, df=None):
         # sort dataframe by df
         sortedDf = self.get_sorted_df(linearizeBy, df)
-        # get list of values for column fieldName
-        filteredDf = sortedDf[[self.idFieldName, fieldName]]
-        keyValuePairs = filteredDf.values.tolist()
-        try:
-            keyValuePairs = list(filter(lambda x: not np.isnan(x[1]), keyValuePairs))
-        except:
-            keyValuePairs = list(filter(lambda x: x[1] != None, keyValuePairs))
-        values = list(map(lambda x: x[1], keyValuePairs))
-        fieldType = None
+        cleanedDf = self.handle_null_values(sortedDf, fieldName)
         try:
             fieldType = self.fieldTypeMap[fieldName]
         except:
@@ -135,24 +136,26 @@ class DataService:
         diffC = DiffComputer(fieldType, relative=relative)
 
         [nextCol, prevCol] = self.get_diff_col_names(relative)
+        
+        cleanedDf[nextCol] = np.nan
+        cleanedDf[prevCol] = np.nan
         # compute diffs
         diffList = []
-        if len(values) == 1:
+        if cleanedDf.shape[0] == 1:
             diffList = []
         else:
-            for i in range(len(values)):
+            for index, row in cleanedDf.iterrows():
                 item = {}
-                if i == 0:
-                    item[prevCol] = None
-                    item[nextCol] = diffC.compute_diff(values[i + 1], values[i])
-                elif i == len(values) - 1:
-                    item[prevCol] = diffC.compute_diff(values[i - 1], values[i])
-                    item[nextCol] = None
+                if index == 0:
+                    cleanedDf.at[index,prevCol] = None
+                    cleanedDf.at[index,nextCol] = diffC.compute_diff(cleanedDf.at[index+1, fieldName], row[fieldName])
+                elif index == cleanedDf.shape[0] - 1:
+                    cleanedDf.at[index,prevCol] = diffC.compute_diff(cleanedDf.at[index-1, fieldName], row[fieldName])
+                    cleanedDf.at[index,nextCol] = None
                 else:
-                    item[prevCol] = diffC.compute_diff(values[i - 1], values[i])
-                    item[nextCol] = diffC.compute_diff(values[i + 1], values[i])
+                    cleanedDf.at[index,prevCol] = diffC.compute_diff(cleanedDf.at[index-1][fieldName], row[fieldName])
+                    cleanedDf.at[index,nextCol] = diffC.compute_diff(cleanedDf.at[index+1][fieldName], row[fieldName])
 
-                item[self.idFieldName] = int(keyValuePairs[i][0])
                 diffList.append(item)
         return list(diffList)
 

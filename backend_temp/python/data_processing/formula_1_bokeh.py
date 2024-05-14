@@ -4,6 +4,8 @@ from bokeh.plotting import figure, curdoc
 from bokeh.sampledata.penguins import data
 from bokeh.transform import factor_cmap, linear_cmap
 from bokeh.palettes import Viridis7
+from diffComputer import DiffComputer
+from dataService import DataService
 import fastf1
 import ptvsd
 import os
@@ -35,6 +37,12 @@ lap = session.laps.pick_fastest()
 laps = filter(is_wet_lap, session.laps)
 tel = lap.get_telemetry()
 tel['nGear'] = tel['nGear'].astype(str)
+tel = tel.reset_index(drop=True)
+
+ds = DataService(tel, {
+    "Speed": float
+})
+ds.add_diff_list(fieldName = "Speed", linearizeBy="Date", df=tel)
 
 SPECIES = sorted(data.species.unique())
 GEARS = sorted(tel["nGear"].unique())

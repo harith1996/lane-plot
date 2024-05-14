@@ -101,7 +101,7 @@ def get_diff_list():
     fieldName = request.args.get("fieldName")
     linearizeBy = request.args.get("linearizeBy")
     relative = request.args.get("relative")
-    out = ds.get_diff_list(fieldName, linearizeBy, relative)
+    out = ds.add_diff_list(fieldName, linearizeBy, relative)
     return out
 
 
@@ -115,7 +115,7 @@ def add_diff_list():
     distinctValues = list(df[sliceBy].unique())
     for val in tqdm(distinctValues, desc="Computing diffs"):
         filteredDf = ds.get_filtered_df(sliceBy, val, ds.df)
-        diffList += ds.get_diff_list(fieldName, linearizeBy, relative, filteredDf)
+        diffList += ds.add_diff_list(fieldName, linearizeBy, relative, filteredDf)
     [nextCol, prevCol] = ds.get_diff_col_names(relative)
     prevFieldName = "_".join([prevCol, fieldName])
     prevValues = list(map(lambda x: [x["unique_id"], x[prevCol]], diffList))
