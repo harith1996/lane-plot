@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Bokeh server",
+            "type": "python",
+            "request": "attach",
+            "port": 5678,
+            "host": "localhost",
+            "cwd": "${fileDirname}",
+            "preLaunchTask": "launch Bokeh server",
+            "postDebugTask": "kill Bokeh server"
+        }
+    ]
+}
