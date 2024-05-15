@@ -145,7 +145,6 @@ class DataService:
             diffList = []
         else:
             for index, row in cleanedDf.iterrows():
-                item = {}
                 if index == 0:
                     cleanedDf.at[index,prevCol] = None
                     cleanedDf.at[index,nextCol] = diffC.compute_diff(cleanedDf.at[index+1, fieldName], row[fieldName])
@@ -153,11 +152,9 @@ class DataService:
                     cleanedDf.at[index,prevCol] = diffC.compute_diff(cleanedDf.at[index-1, fieldName], row[fieldName])
                     cleanedDf.at[index,nextCol] = None
                 else:
-                    cleanedDf.at[index,prevCol] = diffC.compute_diff(cleanedDf.at[index-1][fieldName], row[fieldName])
-                    cleanedDf.at[index,nextCol] = diffC.compute_diff(cleanedDf.at[index+1][fieldName], row[fieldName])
-
-                diffList.append(item)
-        return list(diffList)
+                    cleanedDf.at[index,prevCol] = diffC.compute_diff(cleanedDf.at[index-1,fieldName], row[fieldName])
+                    cleanedDf.at[index,nextCol] = diffC.compute_diff(cleanedDf.at[index+1,fieldName], row[fieldName])
+        return cleanedDf
 
     # filter data points within a rectangular extent, defined by points x1,y1 and x2,y2
     # x1,y1= top-left corner

@@ -42,14 +42,14 @@ tel = tel.reset_index(drop=True)
 ds = DataService(tel, {
     "Speed": float
 })
-ds.add_diff_list(fieldName = "Speed", linearizeBy="Date", df=tel)
+ds.df = ds.add_diff_list(fieldName = "Speed", linearizeBy="Date", df=tel)
 
 SPECIES = sorted(data.species.unique())
 GEARS = sorted(tel["nGear"].unique())
 print(GEARS)
 TOOLS = "box_select,lasso_select,help"
 
-source = ColumnDataSource(tel)
+source = ColumnDataSource(ds.df)
 
 
 left = figure(
@@ -66,7 +66,7 @@ right = figure(
     y_axis_location="right",
 )
 right.scatter(
-    "Speed", "RPM", source=source,
+    "diffNext", "diffLast", source=source,
     color=factor_cmap("nGear", Viridis7, GEARS),
 )
 
