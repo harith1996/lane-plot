@@ -62,12 +62,12 @@ right = figure(
     height=800,
     title=None,
     tools=TOOLS,
-    background_fill_color="#333333",
+    background_fill_color="#ffffff",
     y_axis_location="right",
 )
 
 bottom = figure(
-    width=800, height=300, title=None, tools=TOOLS, background_fill_color="#fafafa"
+    width=800, height=300, title=None, tools=TOOLS, background_fill_color="#ffffff"
 )
 
 bottom.line("Date", "Speed", source=source)
