@@ -2,13 +2,16 @@
 
 LaNe Plot is a scatterplot for visualizing time-series data. Each data point in the time-series is plotted based on the difference in value between its neighbors. This allows smaller patterns that are not visible on a line chart to be revealed and analyzed. See the figure below a design sketch.
 
-![LaNe Plot](src/static/images/quadrant_labels.drawio.png)
+![LaNe Plot](src/static/images/quadrant_labels_mini.drawio.svg)
 
 ## Example dataset: Wikipedia revisions
 
 We took a dataset of Wikipedia revisions and extracted a time series of the size of each edit. This time series was then visualized using LaNe Plot. See the figure below for an example:
 
-![Wiki Revisions](src/static/images/wikipedia_label_quadrants_v2.png)
+![Wiki Patterns](src/static/images/wiki_patterns_concept.svg)
+
+
+![Wiki Patterns Examples](src/static/images/wiki_patterns_examples.png)
 
 To run the app, clone the repository and run the following commands:
 
