@@ -1,6 +1,8 @@
 # LaNe Plot: A transformation for visualizing time-series data
 
-LaNe Plot is a scatterplot for visualizing time-series data. Each data point in the time-series is plotted based on the difference in value between its neighbors. This allows smaller patterns that are not visible on a line chart to be revealed and analyzed. See the figure below a design sketch.
+Published at [EuroVis 2024](https://diglib.eg.org/items/3f080ebe-394a-4ea5-b1b2-ba60ff3db05f)
+
+LaNe Plot is a scatterplot for visualizing time-series data. Each data point in the time-series is plotted based on the difference in value between its neighbors. This allows smaller patterns that are not visible on a line chart to be revealed and analyzed. See the figure below a design sketch. 
 
 ![LaNe Plot](src/static/images/quadrant_labels_mini.drawio.svg)
 
