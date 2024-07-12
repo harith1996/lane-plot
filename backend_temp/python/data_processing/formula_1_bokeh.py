@@ -196,7 +196,7 @@ if os.environ["BOKEH_VS_DEBUG"] == "true":
     ptvsd.enable_attach(address=("localhost", 5678), redirect_output=True)
     ptvsd.wait_for_attach()
 
-session = fastf1.get_session(2023, "Japanese Grand Prix", "R")
+session = fastf1.get_session(2023, "Belgian Grand Prix", "R")
 session.load(telemetry=True)
 fastest_lap = session.laps.pick_fastest()
 
@@ -257,7 +257,9 @@ renderer = left.scatter(
     "Y",
     size=3,
     source=source,
-    selection_color="firebrick"
+    selection_color="firebrick",
+    color=factor_cmap("Number", Category20[num_corners], f1_df["Number"].unique(), start = 1, end = num_corners)
+
 )
 
 left.line("X", "Y", source=fastest_tel, color="grey")
@@ -281,7 +283,7 @@ rs = right.scatter(
 )
 
 bottom = figure(
-    width=PLOT_DIM, height=300, title=None, tools=TOOLS, background_fill_color="#ffffff"
+    width=PLOT_DIM*2, height=300, title=None, tools=TOOLS, background_fill_color="#ffffff"
 )
 
 bottom.line("Date", "Speed", source=source, color="blue")
@@ -289,7 +291,7 @@ bottom.scatter("Date", "Speed", size=1, source=source, color="black")
 
 
 bottom2 = figure(
-    width=PLOT_DIM, height=300, title=None, tools=TOOLS, background_fill_color="#ffffff"
+    width=PLOT_DIM*2, height=300, title=None, tools=TOOLS, background_fill_color="#ffffff"
 )
 bottom2.line("Date", "acceleration", source=source, color="red")
 bottom2.scatter("Date", "acceleration", size=1, source=source, color="black")
