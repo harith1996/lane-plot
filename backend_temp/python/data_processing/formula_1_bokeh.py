@@ -1,8 +1,8 @@
 from bokeh.layouts import gridplot
-from bokeh.models import ColumnDataSource
+from bokeh.models import ColumnDataSource, LinearColorMapper
 from bokeh.plotting import figure, curdoc
 from bokeh.transform import factor_cmap, linear_cmap
-from bokeh.palettes import Viridis256, Viridis7
+from bokeh.palettes import Viridis256, Viridis7, Category20
 from bokeh.util.hex import hexbin
 from bokeh.models import Scatter
 from bokeh.core.properties import field
@@ -16,6 +16,9 @@ from dataService import DataService
 import fastf1
 import ptvsd
 import os
+
+
+PLOT_DIM = 500
 
 
 def distance_to_curve(df, session):
@@ -121,7 +124,7 @@ def lane_max(df, session, key="RPM", nGear=None):
     start_max = True
     for i in range(len(min_points) * 2 - 1):
         i = i // 2
-        #TODO: finding infls is basically find_peaks(gradient) & find_valleys(gradient). Rewrite this to use find_peaks and find_valleys 
+        # TODO: finding infls is basically find_peaks(gradient) & find_valleys(gradient). Rewrite this to use find_peaks and find_valleys
         if start_max:
             start_index = peaks[i]
             end_index = min_points[i]
@@ -153,8 +156,8 @@ def lane_max(df, session, key="RPM", nGear=None):
     #                min_value=11000, max_value=12000)
 
     df_max = df.iloc[events]
-    #why delta=2? because we want to compare peaks against valleys only. and inflection down against inflection up
-    #TODO: How to frame this concept in the paper?
+    # why delta=2? because we want to compare peaks against valleys only. and inflection down against inflection up
+    # TODO: How to frame this concept in the paper?
     df_max = delta_lane_abs(df_max, key=key, delta=2)
 
     point_type = ["max", "infl_down", "min", "infl_up"]
@@ -193,7 +196,7 @@ if os.environ["BOKEH_VS_DEBUG"] == "true":
     ptvsd.enable_attach(address=("localhost", 5678), redirect_output=True)
     ptvsd.wait_for_attach()
 
-session = fastf1.get_session(2023, "British Grand Prix", "R")
+session = fastf1.get_session(2023, "Japanese Grand Prix", "R")
 session.load(telemetry=True)
 fastest_lap = session.laps.pick_fastest()
 
@@ -202,16 +205,33 @@ fastest_tel["nGear"] = fastest_tel["nGear"].astype(str)
 fastest_tel = fastest_tel.reset_index(drop=True)
 
 drivers = session.drivers
-all_tel = session.laps.pick_driver(drivers[0]).get_telemetry()
+first_driver = session.laps.pick_driver(drivers[0])
+all_tel = first_driver.get_telemetry()
 all_tel["nGear"] = all_tel["nGear"].astype(str)
 all_tel = all_tel.reset_index(drop=True)
 
-ds = DataService(all_tel, {"Speed": float})
+# Add lap information
+lap_data = pd.DataFrame(session.laps)
+lap_data = lap_data[lap_data["DriverNumber"] == drivers[0]]
+lap_data = lap_data[["LapNumber", "LapStartDate"]]
+lap_data = lap_data[~lap_data["LapStartDate"].isnull()]
+f1_df = pd.merge_asof(
+    all_tel, lap_data, left_on="Date", right_on="LapStartDate", direction="backward"
+)
+# Calculate the initial distance for each lapnumber
+f1_df['lap_start_distance'] = f1_df.groupby('LapNumber')['Distance'].transform('first')
+# Subtract initial distance from distance
+f1_df['distance_in_lap'] = f1_df['Distance'] - f1_df['lap_start_distance']
+f1_df = distance_to_curve(f1_df, session)
+#convert 'Number' to string
+f1_df["Number"] = f1_df["Number"].astype(str)
+
+ds = DataService(f1_df, {"Speed": float})
 
 
-lane_processed_df = lane_max(all_tel, session, key="Speed")
-lane_processed_df['acceleration'] = np.gradient(lane_processed_df["Speed"])
-lane_processed_df['isPeak'] = False
+lane_processed_df = lane_max(f1_df, session, key="Speed")
+lane_processed_df["acceleration"] = np.gradient(lane_processed_df["Speed"])
+lane_processed_df["isPeak"] = False
 
 peaks = find_peaks(lane_processed_df["Speed"].values)[0]
 
@@ -223,46 +243,65 @@ print(GEARS)
 TOOLS = "box_select,lasso_select,help"
 
 source = ColumnDataSource(lane_processed_df)
-
-
+circuit_length = lane_processed_df["distance_in_lap"].max()
+num_corners = len(session.get_circuit_info().corners)
 left = figure(
-    width=800, height=800, title=None, tools=TOOLS, background_fill_color="#fafafa"
+    width=PLOT_DIM,
+    height=PLOT_DIM,
+    title=None,
+    tools=TOOLS,
+    background_fill_color="#fafafa",
 )
-renderer = left.scatter("X", "Y", size=3, source=source, selection_color="firebrick")
+renderer = left.scatter(
+    "X",
+    "Y",
+    size=3,
+    source=source,
+    selection_color="firebrick"
+)
 
 left.line("X", "Y", source=fastest_tel, color="grey")
 
 bins = hexbin(lane_processed_df["next"], lane_processed_df["last"], 0.1)
 right = figure(
-    width=800,
-    height=800,
+    width=PLOT_DIM,
+    height=PLOT_DIM,
     title=None,
     tools=TOOLS,
     background_fill_color="#ffffff",
     y_axis_location="right",
 )
 
-bottom = figure(
-    width=800, height=300, title=None, tools=TOOLS, background_fill_color="#ffffff"
+rs = right.scatter(
+    "next",
+    "last",
+    source=source,
+    color=factor_cmap("Number", Category20[num_corners], f1_df["Number"].unique(), start = 1, end = num_corners),
+    fill_alpha=0.5,
 )
 
-bottom.line("Date", "Speed", source=source, color='black')
-bottom.circle("Date", "Speed", size = 3, source=source, color="black")
+bottom = figure(
+    width=PLOT_DIM, height=300, title=None, tools=TOOLS, background_fill_color="#ffffff"
+)
+
+bottom.line("Date", "Speed", source=source, color="blue")
+bottom.scatter("Date", "Speed", size=1, source=source, color="black")
 
 
 bottom2 = figure(
-    width=800, height=300, title=None, tools=TOOLS, background_fill_color="#ffffff"
+    width=PLOT_DIM, height=300, title=None, tools=TOOLS, background_fill_color="#ffffff"
 )
 bottom2.line("Date", "acceleration", source=source, color="red")
-bottom2.circle("Date", "acceleration", size = 3, source=source, color="black")
+bottom2.scatter("Date", "acceleration", size=1, source=source, color="black")
 
-right.scatter(
-    "next", "last", source=source, color=factor_cmap("nGear", Viridis7, GEARS)
-)
 # right.hex_tile(
 #     "diffNext", "diffLast", source=source,
 #     fill_color=linear_cmap('counts', Viridis256, 0, max(bins.counts)),
 # )
 
+# create a color bar from the scatter glyph renderer
+color_bar = rs.construct_color_bar(width=10)
+
+right.add_layout(color_bar, 'right')
 
 curdoc().add_root(gridplot([[left, right], [bottom, bottom2]]))
