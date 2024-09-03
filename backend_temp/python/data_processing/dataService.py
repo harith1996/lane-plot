@@ -1,4 +1,4 @@
-import modin.pandas as pd
+import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
@@ -22,7 +22,7 @@ class DataService:
         # split filename to get diffBy and sliceBy
         if fileName != None:
             self.parse_filename(fileName)
-    
+
     def parse_filename(self, fileName: str):
         fileName = fileName.split("/")[-1]
         fileName = fileName.split(".")[0]
@@ -44,7 +44,7 @@ class DataService:
             )
         except:
             df["Timestamp"] = pd.to_timedelta(
-                df[timeFieldName] - pd.Timestamp("1970-01-01"), unit="S"
+                df[timeFieldName] - pd.Timestamp("1970-01-01"), unit="s"
             ) // pd.Timedelta("1s")
 
     def add_time_till_event(
@@ -97,7 +97,9 @@ class DataService:
                     match filterMap["sliceBy"]:
                         case _:
                             slices = df.groupby(self.sliceBy).size()
-                            out[filterName] = slices.sort_values(ascending=False).keys().tolist()
+                            out[filterName] = (
+                                slices.sort_values(ascending=False).keys().tolist()
+                            )
                 case "shownPlots":
                     out[filterName] = ["size", "timestamp", "relSize", "relDiff"]
                 case "eventType":
@@ -113,19 +115,20 @@ class DataService:
             [nextCol, prevCol] = ["relDiffNext", "reldiffLast"]
         return [nextCol, prevCol]
 
+    def handle_null_values(self, df: pd.DataFrame, column: str):
+        last_non_null = None
+        for index, x in df.iterrows():
+            if x[column] == None or np.isnan(x[column]):
+                df.loc[index, column] = last_non_null
+            else:
+                last_non_null = x[column]
+        return df
+
     # TODO: add values directly to dataframe
-    def get_diff_list(self, fieldName, linearizeBy, relative=False, df=None):
+    def add_diff_list(self, fieldName, linearizeBy, relative=False, df=None):
         # sort dataframe by df
         sortedDf = self.get_sorted_df(linearizeBy, df)
-        # get list of values for column fieldName
-        filteredDf = sortedDf[[self.idFieldName, fieldName]]
-        keyValuePairs = filteredDf.values.tolist()
-        try:
-            keyValuePairs = list(filter(lambda x: not np.isnan(x[1]), keyValuePairs))
-        except:
-            keyValuePairs = list(filter(lambda x: x[1] != None, keyValuePairs))
-        values = list(map(lambda x: x[1], keyValuePairs))
-        fieldType = None
+        cleanedDf = self.handle_null_values(sortedDf, fieldName)
         try:
             fieldType = self.fieldTypeMap[fieldName]
         except:
@@ -135,26 +138,33 @@ class DataService:
         diffC = DiffComputer(fieldType, relative=relative)
 
         [nextCol, prevCol] = self.get_diff_col_names(relative)
+
+        cleanedDf[nextCol] = np.nan
+        cleanedDf[prevCol] = np.nan
         # compute diffs
         diffList = []
-        if len(values) == 1:
+        if cleanedDf.shape[0] == 1:
             diffList = []
         else:
-            for i in range(len(values)):
-                item = {}
-                if i == 0:
-                    item[prevCol] = None
-                    item[nextCol] = diffC.compute_diff(values[i + 1], values[i])
-                elif i == len(values) - 1:
-                    item[prevCol] = diffC.compute_diff(values[i - 1], values[i])
-                    item[nextCol] = None
+            for index, row in cleanedDf.iterrows():
+                if index == 0:
+                    cleanedDf.at[index, prevCol] = None
+                    cleanedDf.at[index, nextCol] = diffC.compute_diff(
+                        cleanedDf.at[index + 1, fieldName], row[fieldName]
+                    )
+                elif index == cleanedDf.shape[0] - 1:
+                    cleanedDf.at[index, prevCol] = diffC.compute_diff(
+                        cleanedDf.at[index - 1, fieldName], row[fieldName]
+                    )
+                    cleanedDf.at[index, nextCol] = None
                 else:
-                    item[prevCol] = diffC.compute_diff(values[i - 1], values[i])
-                    item[nextCol] = diffC.compute_diff(values[i + 1], values[i])
-
-                item[self.idFieldName] = int(keyValuePairs[i][0])
-                diffList.append(item)
-        return list(diffList)
+                    cleanedDf.at[index, prevCol] = diffC.compute_diff(
+                        cleanedDf.at[index - 1, fieldName], row[fieldName]
+                    )
+                    cleanedDf.at[index, nextCol] = diffC.compute_diff(
+                        cleanedDf.at[index + 1, fieldName], row[fieldName]
+                    )
+        return cleanedDf
 
     # filter data points within a rectangular extent, defined by points x1,y1 and x2,y2
     # x1,y1= top-left corner
@@ -190,8 +200,10 @@ class DataService:
             return article["page_name"].iloc[0]
         elif fieldName == "page_name":
             return fieldValue
-        
-    def get_adjacent_event_ids(self, linearizeByField, sliceByField, sliceByValue, idFieldName, currentId):
+
+    def get_adjacent_event_ids(
+        self, linearizeByField, sliceByField, sliceByValue, idFieldName, currentId
+    ):
         df = self.df
         # group dataframe by sliceByField
         groupedDf = df.groupby(sliceByField)
@@ -207,5 +219,5 @@ class DataService:
         return {
             "prevId": str(prevRow[idFieldName]),
             "currId": str(currentId),
-            "nextId": str(nextRow[idFieldName])
+            "nextId": str(nextRow[idFieldName]),
         }

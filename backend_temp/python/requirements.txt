@@ -6,3 +6,4 @@ virtualenv
 joblib
 modin
 tqdm
+bokeh
