@@ -4,13 +4,13 @@ LaNe Plot is a scatterplot for visualizing time-series data. Each data point in 
 
 ![LaNe Plot](src/static/images/quadrant_labels.drawio.png)
 
-## Example dataset: Wikipedia revisions
+## Example dataset 1: Wikipedia revisions
 
 We took a dataset of Wikipedia revisions and extracted a time series of the size of each edit. This time series was then visualized using LaNe Plot. See the figure below for an example:
 
 ![Wiki Revisions](src/static/images/wikipedia_label_quadrants_v2.png)
 
-To run the app, clone the repository and run the following commands:
+To explore the wikipedia dataset, clone the repository and run the following commands:
 
 ### `npm install`
 ### `cd backend_temp/python`
@@ -19,10 +19,28 @@ To run the app, clone the repository and run the following commands:
 ### `npm run dev`
 
 Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Open [http://localhost:5173/](http://localhost:5173/) to view it in the browser.
 
 The page will reload if you make edits.\
 You will also see any lint errors in the console.
+
+## Example dataset 2: Formula 1 telemetry data
+
+We took a dataset of Formula 1 telemetry data and extracted a time series of the speed of the car. This time series was then visualized using LaNe Plot. See the figure below for an example:
+
+![Formula 1 Telemetry](docs/images/formula_1.png)
+
+To explore the formula 1 dataset, it is **recommended that you use Visual Studio Code**. Clone the repository and run the following commands:
+
+### `cd backend_temp/python`
+### `pip install -r requirements.txt`
+### `cd data_processing`
+
+1. Open `formula_1_bokeh.py`.
+2. Click on the drop down menu next to the "Run" button (top-right corner). 
+3. Select `Python Debugger: Debug using launch.json`.
+
+The visualization should open on your default browser. **First time loading takes a few minutes**, as the formula 1 dataset is being fetched from the web and cached. Later runs will be faster.
 
 Written in TypeScript and Python. Built with React, Flask, and D3.js.
 
