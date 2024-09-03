@@ -11,8 +11,6 @@ from scipy.signal import find_peaks
 import pandas as pd
 import numpy as np
 
-from diffComputer import DiffComputer
-from dataService import DataService
 import fastf1
 import ptvsd
 import os
@@ -226,8 +224,6 @@ f1_df = distance_to_curve(f1_df, session)
 #convert 'Number' to string
 f1_df["Number"] = f1_df["Number"].astype(str)
 
-ds = DataService(f1_df, {"Speed": float})
-
 
 lane_processed_df = lane_max(f1_df, session, key="Speed")
 lane_processed_df["acceleration"] = np.gradient(lane_processed_df["Speed"])
@@ -264,23 +260,27 @@ renderer = left.scatter(
 
 left.line("X", "Y", source=fastest_tel, color="grey")
 
-bins = hexbin(lane_processed_df["next"], lane_processed_df["last"], 0.1)
+bins = hexbin(lane_processed_df["next"], lane_processed_df["last"], 5)
 right = figure(
-    width=PLOT_DIM,
+    width=PLOT_DIM + 100,
     height=PLOT_DIM,
     title=None,
     tools=TOOLS,
-    background_fill_color="#ffffff",
+    background_fill_color='#440154',
     y_axis_location="right",
 )
+right.grid.visible = False
 
-rs = right.scatter(
-    "next",
-    "last",
-    source=source,
-    color=factor_cmap("Number", Category20[num_corners], f1_df["Number"].unique(), start = 1, end = num_corners),
-    fill_alpha=0.5,
-)
+rs = right.hex_tile(q="q", r="r", size=5, line_color=None, source=bins,
+           fill_color=linear_cmap('counts', 'Viridis256', 0, max(bins.counts)))
+
+# rs = right.scatter(
+#     "next",
+#     "last",
+#     source=source,
+#     color=factor_cmap("Number", Category20[num_corners], f1_df["Number"].unique(), start = 1, end = num_corners),
+#     fill_alpha=0.5,
+# )
 
 bottom = figure(
     width=PLOT_DIM*2, height=300, title=None, tools=TOOLS, background_fill_color="#ffffff"
